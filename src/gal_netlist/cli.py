@@ -30,6 +30,7 @@ def main(argv: list[str] | None = None) -> int:
     verify_cmd.add_argument("path", type=Path)
     verify_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
     verify_cmd.add_argument("--no-dialect", action="store_true", help="skip dialect vocabulary validation")
+    verify_cmd.add_argument("--json", action="store_true", help="emit JSON verification report")
 
     dialects_cmd = subparsers.add_parser("dialects", help="list available dialect specs")
     dialects_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
@@ -88,7 +89,11 @@ def main(argv: list[str] | None = None) -> int:
     else:
         document = parse_text(text)
         if document["errors"]:
-            print(json.dumps({"ok": False, "errors": document["errors"]}, indent=2), file=sys.stderr)
+            payload = _verify_parse_error(args.path, document) if args.command == "verify" else {"ok": False, "errors": document["errors"]}
+            if args.command == "verify" and args.json:
+                print(json.dumps(payload, indent=2, sort_keys=True))
+            else:
+                print(json.dumps(payload, indent=2), file=sys.stderr)
             return 1
 
     if args.command == "parse":
@@ -103,24 +108,24 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "verify":
-        rendered = render_document(document)
-        reparsed = parse_text(rendered)
-        if reparsed["errors"]:
-            print(json.dumps({"ok": False, "errors": reparsed["errors"]}, indent=2), file=sys.stderr)
+        report = _verify_report(
+            document,
+            path=args.path,
+            dialect_dirs=args.dialect_dir or default_dialect_dirs(args.path),
+            no_dialect=args.no_dialect,
+        )
+        if args.json:
+            print(json.dumps(report, indent=2, sort_keys=True))
+            return 0 if report["ok"] else 1
+        if report.get("errors"):
+            print(json.dumps({"ok": False, "errors": report["errors"]}, indent=2), file=sys.stderr)
             return 1
-        if _semantic_document(document) != _semantic_document(reparsed):
-            print(json.dumps({"ok": False, "error": "semantic_roundtrip_failed"}, indent=2), file=sys.stderr)
+        if report.get("error"):
+            print(json.dumps({"ok": False, "error": report["error"]}, indent=2), file=sys.stderr)
             return 1
-        if not args.no_dialect:
-            registry = load_registry(args.dialect_dir or default_dialect_dirs(args.path))
-            validation_issues = validate_document(document, registry)
-            validation_issues.extend(validate_components(document, build_component_registry(registry)))
-            if validation_issues:
-                print(
-                    json.dumps({"ok": False, "validation": [issue.to_dict() for issue in validation_issues]}, indent=2),
-                    file=sys.stderr,
-                )
-                return 1
+        if report.get("validation"):
+            print(json.dumps({"ok": False, "validation": report["validation"]}, indent=2), file=sys.stderr)
+            return 1
         print(f"ok: {args.path}")
         return 0
 
@@ -170,6 +175,83 @@ def _semantic_document(document: dict) -> dict:
         return value
 
     return clean(document)
+
+
+def _verify_parse_error(path: Path, document: dict) -> dict:
+    return {
+        "ok": False,
+        "path": str(path),
+        "schema": document.get("schema"),
+        "dialect": document.get("dialect"),
+        "summary": _summary(document),
+        "checks": {
+            "parse": False,
+            "semanticRoundtrip": False,
+            "dialect": False,
+            "components": False,
+        },
+        "skipped": [],
+        "errors": document["errors"],
+        "validation": [],
+    }
+
+
+def _verify_report(document: dict, *, path: Path, dialect_dirs: list[Path], no_dialect: bool) -> dict:
+    report = {
+        "ok": True,
+        "path": str(path),
+        "schema": document.get("schema"),
+        "dialect": document.get("dialect"),
+        "summary": _summary(document),
+        "checks": {
+            "parse": True,
+            "semanticRoundtrip": False,
+            "dialect": False,
+            "components": False,
+        },
+        "skipped": [],
+        "errors": [],
+        "validation": [],
+    }
+
+    rendered = render_document(document)
+    reparsed = parse_text(rendered)
+    if reparsed["errors"]:
+        report["ok"] = False
+        report["errors"] = reparsed["errors"]
+        return report
+    if _semantic_document(document) != _semantic_document(reparsed):
+        report["ok"] = False
+        report["error"] = "semantic_roundtrip_failed"
+        return report
+    report["checks"]["semanticRoundtrip"] = True
+
+    if no_dialect:
+        report["skipped"] = ["dialect", "components"]
+        return report
+
+    registry = load_registry(dialect_dirs)
+    dialect_issues = validate_document(document, registry)
+    report["checks"]["dialect"] = not dialect_issues
+    component_issues = validate_components(document, build_component_registry(registry))
+    report["checks"]["components"] = not component_issues
+    validation_issues = [*dialect_issues, *component_issues]
+    if validation_issues:
+        report["ok"] = False
+        report["validation"] = [issue.to_dict() for issue in validation_issues]
+
+    return report
+
+
+def _summary(document: dict) -> dict[str, int]:
+    return {
+        "entries": len(document.get("entries", [])),
+        "nodes": len(document.get("nodes", [])),
+        "edges": len(document.get("edges", [])),
+        "nets": len(document.get("nets", [])),
+        "schedules": len(document.get("schedules", [])),
+        "sets": len(document.get("sets", [])),
+    }
 
 
 if __name__ == "__main__":
