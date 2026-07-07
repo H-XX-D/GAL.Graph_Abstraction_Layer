@@ -127,10 +127,11 @@ gal dialects
 
 `gal verify` parses, canonicalizes, checks semantic round-trip, and validates the
 declared `@dialect` against vocabulary blocks loaded from `docs/dialects/*.md`.
-It also checks registered component metadata for reusable net and standing
-operations, including core net operation arity. Use `--no-dialect` to run only
-syntax and round-trip verification, or `--dialect-dir <path>` to point at
-another dialect spec directory.
+It checks node kinds, fields, relations, net operations, net input signals,
+standing operations, and threads. It also checks registered component metadata
+for reusable net and standing operations, including core net operation arity.
+Use `--no-dialect` to run only syntax and round-trip verification, or
+`--dialect-dir <path>` to point at another dialect spec directory.
 
 `gal load` is currently an in-memory loader contract. It reports intended
 changes for `plan`, checks runtime agreement for `verify`, builds a fresh

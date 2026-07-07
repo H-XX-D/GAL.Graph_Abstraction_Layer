@@ -57,7 +57,7 @@ def test_cli_components_json_lists_registry(capsys):
 
 def test_cli_verify_uses_component_validation(tmp_path, capsys):
     path = tmp_path / "bad.gal"
-    path.write_text("@gal netlist.v0\n@dialect mal.v0\nnet bad and2 only_one\n", encoding="utf-8")
+    path.write_text("@gal netlist.v0\n@dialect mal.v0\nnet bad and2 weak\n", encoding="utf-8")
 
     assert main(["verify", str(path), "--dialect-dir", str(ROOT / "docs" / "dialects")]) == 1
     payload = json.loads(capsys.readouterr().err)

@@ -63,7 +63,7 @@ def test_loader_reports_dialect_rejections():
 
 
 def test_loader_reports_component_rejections():
-    document = parse_text("@gal netlist.v0\n@dialect mal.v0\nnet bad and2 only_one\n")
+    document = parse_text("@gal netlist.v0\n@dialect mal.v0\nnet bad and2 weak\n")
     report = load_document(
         document,
         mode="plan",

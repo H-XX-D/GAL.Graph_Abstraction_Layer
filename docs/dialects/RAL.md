@@ -13,7 +13,7 @@ capacity, quota, allocation, and placement.
   "nodeKinds": ["resource", "pool", "quota", "allocation", "compute", "storage", "network", "region", "tenant"],
   "relations": ["allocates", "reserved_for", "consumes", "hosts", "located_in", "constrained_by", "scales_with", "depends_on"],
   "fields": ["capacity", "used", "available", "cost", "latency", "pressure", "risk"],
-  "signals": ["available", "saturated", "over_quota", "underused", "movable", "reserved"],
+  "signals": ["available", "not_over_quota", "saturated", "over_quota", "underused", "movable", "reserved"],
   "netOps": ["not1", "and2", "or2", "xor2", "lut5"],
   "standingOps": ["measure", "allocate", "rebalance", "forecast", "enforce_quota", "place"],
   "threads": ["tick", "scheduler", "capacity"]

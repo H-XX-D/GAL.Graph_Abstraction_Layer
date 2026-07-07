@@ -38,7 +38,7 @@ GAL text -> AST -> canonical GAL text -> AST
 
 Status: initial implementation landed. `gal verify` now loads dialect vocabulary
 blocks from `docs/dialects/*.md` and validates node kinds, fields, relations,
-net operations, standing operations, and threads.
+signals, net operations, standing operations, and threads.
 
 - Load dialect schemas from local markdown JSON vocabulary blocks.
 - Validate node kinds, edge relations, fields, signals, operations, and threads.

@@ -37,6 +37,29 @@ def test_unknown_node_kind_reports_structured_validation_issue():
     ]
 
 
+def test_unknown_signal_reports_structured_validation_issue():
+    registry = load_registry([ROOT / "docs" / "dialects"])
+    document = parse_text("@gal netlist.v0\n@dialect mal.v0\nnet alert or2 high_concern mystery_signal\n")
+    issues = validate_document(document, registry)
+    assert [issue.to_dict() for issue in issues] == [
+        {
+            "line": 3,
+            "column": 1,
+            "code": "unknown_signal",
+            "message": "signal 'mystery_signal' is not allowed by mal.v0",
+            "text": "net alert or2 high_concern mystery_signal",
+        }
+    ]
+
+
+def test_net_inputs_can_reference_declared_graph_symbols():
+    registry = load_registry([ROOT / "docs" / "dialects"])
+    document = parse_text(
+        '@gal netlist.v0\n@dialect mal.v0\nclaim_ab12 "Claim" [kind: claim]\nnet alert or2 claim_ab12 route\nnet route not1 alert\n'
+    )
+    assert validate_document(document, registry) == []
+
+
 def test_default_dialect_dirs_finds_repo_docs():
     candidates = default_dialect_dirs(ROOT / "examples" / "minimal.mal.gal")
     assert ROOT / "docs" / "dialects" in candidates

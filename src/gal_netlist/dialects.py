@@ -88,9 +88,12 @@ def validate_document(document: dict[str, Any], registry: DialectRegistry) -> li
     allowed_node_kinds = set(spec.get("nodeKinds", []))
     allowed_relations = set(spec.get("relations", []))
     allowed_fields = set(spec.get("fields", []))
+    allowed_signals = set(spec.get("signals", []))
     allowed_net_ops = set(spec.get("netOps", []))
     allowed_standing_ops = set(spec.get("standingOps", []))
     allowed_threads = set(spec.get("threads", []))
+    graph_symbols = {node["id"] for node in document.get("nodes", [])}
+    graph_symbols.update(net["output"] for net in document.get("nets", []))
 
     for node in document.get("nodes", []):
         for field in node.get("fields", []):
@@ -107,6 +110,9 @@ def validate_document(document: dict[str, Any], registry: DialectRegistry) -> li
     for net in document.get("nets", []):
         if allowed_net_ops and net["op"] not in allowed_net_ops:
             issues.append(_issue(net, "unknown_net_op", f"net op {net['op']!r} is not allowed by {dialect_id}"))
+        for signal in net.get("inputs", []):
+            if allowed_signals and signal not in allowed_signals and signal not in graph_symbols:
+                issues.append(_issue(net, "unknown_signal", f"signal {signal!r} is not allowed by {dialect_id}"))
 
     for schedule in document.get("schedules", []):
         if allowed_standing_ops and schedule["base"] not in allowed_standing_ops:
