@@ -29,6 +29,13 @@ def main(argv: list[str] | None = None) -> int:
     format_cmd = subparsers.add_parser("format", help="render canonical GAL text")
     format_cmd.add_argument("path", type=Path)
 
+    init_cmd = subparsers.add_parser("init", help="create a starter GAL file")
+    init_cmd.add_argument("path", type=Path)
+    init_cmd.add_argument("--dialect", default="mal.v0", help="dialect id for the starter file")
+    init_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
+    init_cmd.add_argument("--force", action="store_true", help="overwrite an existing file")
+    init_cmd.add_argument("--parents", action="store_true", help="create parent directories")
+
     verify_cmd = subparsers.add_parser("verify", help="parse and semantic round-trip a GAL file")
     verify_cmd.add_argument("path", type=Path)
     verify_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
@@ -135,6 +142,25 @@ def main(argv: list[str] | None = None) -> int:
             print(f"dialects: {report['dialectCount']}")
             print(f"schemas: {report['schemaCount']}")
             print(f"docs schemas complete: {'yes' if report['docsSchemas']['complete'] else 'no'}")
+        return 0
+
+    if args.command == "init":
+        registry = load_registry(args.dialect_dir or default_dialect_dirs(args.path))
+        spec = registry.get(args.dialect)
+        if spec is None:
+            print(json.dumps({"ok": False, "error": "unknown_dialect", "dialect": args.dialect}, indent=2), file=sys.stderr)
+            return 1
+        if args.path.exists() and not args.force:
+            print(json.dumps({"ok": False, "error": "file_exists", "path": str(args.path)}, indent=2), file=sys.stderr)
+            return 1
+        if args.parents:
+            args.path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            args.path.write_text(_starter_text(args.dialect, spec), encoding="utf-8")
+        except OSError as exc:
+            print(json.dumps({"ok": False, "error": "write_error", "path": str(args.path), "message": str(exc)}, indent=2), file=sys.stderr)
+            return 1
+        print(f"created: {args.path}")
         return 0
 
     if args.command == "verify-all":
@@ -414,6 +440,22 @@ def _find_docs_schemas_dir() -> Path | None:
         if candidate.exists():
             return candidate
     return None
+
+
+def _starter_text(dialect_id: str, spec: dict) -> str:
+    node_kinds = spec.get("nodeKinds") or ["node"]
+    kind = str(node_kinds[0])
+    node_id = f"{_safe_identifier(kind)}_1"
+    label = f"Starter {kind.replace('_', ' ')}"
+    return f'@gal netlist.v0\n@dialect {dialect_id}\n\n{node_id} "{label}" [kind: {kind}]\n'
+
+
+def _safe_identifier(value: str) -> str:
+    chars = [char if char.isalnum() or char == "_" else "_" for char in value.lower()]
+    identifier = "".join(chars).strip("_") or "node"
+    if identifier[0].isdigit():
+        return f"n_{identifier}"
+    return identifier
 
 
 def _summary(document: dict) -> dict[str, int]:

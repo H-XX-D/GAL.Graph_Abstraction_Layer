@@ -96,6 +96,8 @@ python3 -m pytest -q
 python3 -m build
 gal --version
 gal doctor --json
+gal init starter.mal.gal
+gal init starter.hal.gal --dialect hal.v0
 gal verify examples/minimal.mal.gal
 gal verify examples/minimal.mal.gal --json
 gal verify-all examples --json
@@ -120,6 +122,8 @@ The current CLI shape is:
 ```bash
 gal --version
 gal doctor
+gal init graph.gal
+gal init graph.gal --dialect hal.v0 --force
 gal parse graph.gal --json
 gal format graph.gal
 gal verify graph.gal
@@ -153,6 +157,10 @@ Use `--no-dialect` to run only syntax and round-trip verification, or
 Use `--json` to emit a structured verification report for CI or adapters.
 `gal verify-all` accepts files and directories, recursively checks `*.gal`
 files, and returns a batch report.
+
+`gal init` creates a starter GAL file for a registered dialect. It defaults to
+`mal.v0`, refuses to overwrite existing files unless `--force` is supplied, and
+can create missing parent directories with `--parents`.
 
 `gal load` is currently an in-memory loader contract. It reports intended
 changes for `plan`, checks runtime agreement for `verify`, builds a fresh
