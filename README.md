@@ -95,6 +95,7 @@ python3 -m pytest -q
 gal verify examples/minimal.mal.gal
 gal parse examples/dialects/hal.gal --json
 gal format examples/dialects/hal.gal
+gal dialects
 ```
 
 The current CLI shape is:
@@ -104,4 +105,10 @@ gal parse graph.gal --json
 gal format graph.gal
 gal verify graph.gal
 gal convert graph.gal --to json
+gal dialects
 ```
+
+`gal verify` parses, canonicalizes, checks semantic round-trip, and validates the
+declared `@dialect` against vocabulary blocks loaded from `docs/dialects/*.md`.
+Use `--no-dialect` to run only syntax and round-trip verification, or
+`--dialect-dir <path>` to point at another dialect spec directory.

@@ -7,6 +7,7 @@ import json
 import sys
 from pathlib import Path
 
+from .dialects import default_dialect_dirs, load_registry, validate_document
 from .parser import parse_text
 from .renderer import render_document
 
@@ -24,12 +25,23 @@ def main(argv: list[str] | None = None) -> int:
 
     verify_cmd = subparsers.add_parser("verify", help="parse and semantic round-trip a GAL file")
     verify_cmd.add_argument("path", type=Path)
+    verify_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
+    verify_cmd.add_argument("--no-dialect", action="store_true", help="skip dialect vocabulary validation")
+
+    dialects_cmd = subparsers.add_parser("dialects", help="list available dialect specs")
+    dialects_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
 
     convert_cmd = subparsers.add_parser("convert", help="convert GAL to another representation")
     convert_cmd.add_argument("path", type=Path)
     convert_cmd.add_argument("--to", choices=["json"], required=True)
 
     args = parser.parse_args(argv)
+    if args.command == "dialects":
+        registry = load_registry(args.dialect_dir or default_dialect_dirs(Path.cwd()))
+        for dialect_id in registry.ids():
+            print(dialect_id)
+        return 0
+
     text = args.path.read_text(encoding="utf-8")
     document = parse_text(text)
     if document["errors"]:
@@ -56,6 +68,15 @@ def main(argv: list[str] | None = None) -> int:
         if _semantic_document(document) != _semantic_document(reparsed):
             print(json.dumps({"ok": False, "error": "semantic_roundtrip_failed"}, indent=2), file=sys.stderr)
             return 1
+        if not args.no_dialect:
+            registry = load_registry(args.dialect_dir or default_dialect_dirs(args.path))
+            validation_issues = validate_document(document, registry)
+            if validation_issues:
+                print(
+                    json.dumps({"ok": False, "validation": [issue.to_dict() for issue in validation_issues]}, indent=2),
+                    file=sys.stderr,
+                )
+                return 1
         print(f"ok: {args.path}")
         return 0
 
