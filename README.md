@@ -158,6 +158,8 @@ operation arity.
 
 GitHub Actions runs the same core checks on push and pull request: unit tests,
 `gal verify-all examples --json`, and CLI smoke commands.
+The test suite also validates emitted CLI payloads against the JSON Schemas
+published by `gal schemas`.
 
 `gal schemas` lists the machine-readable JSON Schema contracts for the current
 CLI payloads. Pass a schema id, such as `gal.verify_report.v0`, to emit that

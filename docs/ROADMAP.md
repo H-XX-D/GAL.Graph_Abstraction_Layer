@@ -85,6 +85,7 @@ fixture verification, and CLI smoke checks on push and pull request.
 - Run `gal verify-all examples --json` in CI.
 - Smoke registry, conversion, and loader CLI commands in CI.
 - Publish schema contracts for adapter-facing JSON payloads.
+- Validate representative CLI payloads against the published JSON Schemas.
 
 ## Near-Term Deliverable
 
