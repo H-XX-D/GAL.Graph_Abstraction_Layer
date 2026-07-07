@@ -99,6 +99,8 @@ gal convert examples/dialects/hal.gal --to dot
 gal convert examples/dialects/hal.gal --to yaml
 gal convert examples/dialects/hal.gal --to cypher
 gal convert ast.json --from json --to gal
+gal load examples/dialects/hal.gal --mode plan
+gal load examples/dialects/hal.gal --mode replay
 gal dialects
 ```
 
@@ -113,6 +115,10 @@ gal convert graph.gal --to dot
 gal convert graph.gal --to yaml
 gal convert graph.gal --to cypher
 gal convert ast.json --from json --to gal
+gal load graph.gal --mode verify
+gal load graph.gal --mode plan
+gal load graph.gal --mode replay
+gal load graph.gal --mode merge --runtime-json runtime.json
 gal dialects
 ```
 
@@ -120,3 +126,8 @@ gal dialects
 declared `@dialect` against vocabulary blocks loaded from `docs/dialects/*.md`.
 Use `--no-dialect` to run only syntax and round-trip verification, or
 `--dialect-dir <path>` to point at another dialect spec directory.
+
+`gal load` is currently an in-memory loader contract. It reports intended
+changes for `plan`, checks runtime agreement for `verify`, builds a fresh
+runtime state for `replay`, and applies changes into an existing runtime JSON for
+`merge`.

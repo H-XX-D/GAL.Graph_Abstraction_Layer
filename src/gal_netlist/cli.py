@@ -9,6 +9,7 @@ from pathlib import Path
 
 from .converters import to_cypher, to_dot, to_yaml
 from .dialects import default_dialect_dirs, load_registry, validate_document
+from .loader import LOAD_MODES, load_document
 from .parser import parse_text
 from .renderer import render_document
 
@@ -36,6 +37,13 @@ def main(argv: list[str] | None = None) -> int:
     convert_cmd.add_argument("path", type=Path)
     convert_cmd.add_argument("--from", dest="from_format", choices=["gal", "json"], default="gal")
     convert_cmd.add_argument("--to", choices=["gal", "json", "dot", "yaml", "cypher"], required=True)
+
+    load_cmd = subparsers.add_parser("load", help="load GAL into an in-memory runtime report")
+    load_cmd.add_argument("path", type=Path)
+    load_cmd.add_argument("--mode", choices=sorted(LOAD_MODES), required=True)
+    load_cmd.add_argument("--runtime-json", type=Path, help="existing runtime JSON for verify or merge")
+    load_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
+    load_cmd.add_argument("--no-dialect", action="store_true", help="skip dialect vocabulary validation")
 
     args = parser.parse_args(argv)
     if args.command == "dialects":
@@ -98,6 +106,15 @@ def main(argv: list[str] | None = None) -> int:
         elif args.to == "cypher":
             sys.stdout.write(to_cypher(semantic_document))
         return 0
+
+    if args.command == "load":
+        runtime = None
+        if args.runtime_json is not None:
+            runtime = json.loads(args.runtime_json.read_text(encoding="utf-8"))
+        registry = None if args.no_dialect else load_registry(args.dialect_dir or default_dialect_dirs(args.path))
+        report = load_document(_semantic_document(document), mode=args.mode, registry=registry, runtime=runtime)
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return 0 if report["ok"] else 1
 
     return 2
 

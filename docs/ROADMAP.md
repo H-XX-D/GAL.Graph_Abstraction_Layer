@@ -59,6 +59,10 @@ canonical GAL text.
 
 ## Phase 4: Runtime Integration
 
+Status: initial in-memory loader contract landed. `gal load` supports `verify`,
+`plan`, `replay`, and `merge` modes and returns structured JSON reports before
+any external runtime adapter is introduced.
+
 - Define loader modes: `verify`, `plan`, `merge`, and `replay`.
 - Add loader reporting for admitted nodes, attached edges, created nets,
   scheduled operations, parameter sets, and rejections.
