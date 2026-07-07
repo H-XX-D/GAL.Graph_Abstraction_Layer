@@ -94,6 +94,7 @@ Run the current checks:
 python3 -m pytest -q
 gal verify examples/minimal.mal.gal
 gal verify examples/minimal.mal.gal --json
+gal verify-all examples --json
 gal parse examples/dialects/hal.gal --json
 gal format examples/dialects/hal.gal
 gal convert examples/dialects/hal.gal --to dot
@@ -114,6 +115,7 @@ gal parse graph.gal --json
 gal format graph.gal
 gal verify graph.gal
 gal verify graph.gal --json
+gal verify-all graph.gal examples/
 gal convert graph.gal --to json
 gal convert graph.gal --to dot
 gal convert graph.gal --to yaml
@@ -137,6 +139,8 @@ for reusable net and standing operations, including core net operation arity.
 Use `--no-dialect` to run only syntax and round-trip verification, or
 `--dialect-dir <path>` to point at another dialect spec directory.
 Use `--json` to emit a structured verification report for CI or adapters.
+`gal verify-all` accepts files and directories, recursively checks `*.gal`
+files, and returns a batch report.
 
 `gal load` is currently an in-memory loader contract. It reports intended
 changes for `plan`, checks runtime agreement for `verify`, builds a fresh

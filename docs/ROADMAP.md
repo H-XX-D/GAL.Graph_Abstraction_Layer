@@ -41,6 +41,7 @@ blocks from `docs/dialects/*.md` and validates node kinds, fields, relations,
 signals, net operations, standing operations, and threads.
 `gal dialects --json` exports the loaded registry as machine-readable data.
 `gal verify --json` emits a structured verification report for CI and adapters.
+`gal verify-all` verifies files or directories and can emit a batch JSON report.
 
 - Load dialect schemas from local markdown JSON vocabulary blocks.
 - Validate node kinds, edge relations, fields, signals, operations, and threads.

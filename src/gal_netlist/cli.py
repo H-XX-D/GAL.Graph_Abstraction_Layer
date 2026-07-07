@@ -32,6 +32,12 @@ def main(argv: list[str] | None = None) -> int:
     verify_cmd.add_argument("--no-dialect", action="store_true", help="skip dialect vocabulary validation")
     verify_cmd.add_argument("--json", action="store_true", help="emit JSON verification report")
 
+    verify_all_cmd = subparsers.add_parser("verify-all", help="verify GAL files or directories")
+    verify_all_cmd.add_argument("targets", type=Path, nargs="+")
+    verify_all_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
+    verify_all_cmd.add_argument("--no-dialect", action="store_true", help="skip dialect vocabulary validation")
+    verify_all_cmd.add_argument("--json", action="store_true", help="emit JSON batch verification report")
+
     dialects_cmd = subparsers.add_parser("dialects", help="list available dialect specs")
     dialects_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
     dialects_cmd.add_argument("--json", action="store_true", help="emit JSON dialect registry")
@@ -82,6 +88,21 @@ def main(argv: list[str] | None = None) -> int:
                 threads = ",".join(sorted(component.threads_for(None)))
                 print(f"standing_op {name} threads={threads} sources={','.join(sorted(component.sources))}")
         return 0
+
+    if args.command == "verify-all":
+        paths = _expand_verify_targets(args.targets)
+        reports = [
+            _verify_path(path, dialect_dirs=args.dialect_dir or default_dialect_dirs(path), no_dialect=args.no_dialect)
+            for path in paths
+        ]
+        payload = _batch_report(reports)
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            for report in reports:
+                print(f"{'ok' if report['ok'] else 'fail'}: {report['path']}")
+            print(f"summary: {payload['passed']} passed, {payload['failed']} failed, {payload['count']} total")
+        return 0 if payload["ok"] else 1
 
     text = args.path.read_text(encoding="utf-8")
     if args.command == "convert" and args.from_format == "json":
@@ -196,6 +217,16 @@ def _verify_parse_error(path: Path, document: dict) -> dict:
     }
 
 
+def _verify_path(path: Path, *, dialect_dirs: list[Path], no_dialect: bool) -> dict:
+    try:
+        document = parse_text(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        return _read_error(path, exc)
+    if document["errors"]:
+        return _verify_parse_error(path, document)
+    return _verify_report(document, path=path, dialect_dirs=dialect_dirs, no_dialect=no_dialect)
+
+
 def _verify_report(document: dict, *, path: Path, dialect_dirs: list[Path], no_dialect: bool) -> dict:
     report = {
         "ok": True,
@@ -241,6 +272,55 @@ def _verify_report(document: dict, *, path: Path, dialect_dirs: list[Path], no_d
         report["validation"] = [issue.to_dict() for issue in validation_issues]
 
     return report
+
+
+def _read_error(path: Path, exc: OSError) -> dict:
+    return {
+        "ok": False,
+        "path": str(path),
+        "schema": None,
+        "dialect": None,
+        "summary": _summary({}),
+        "checks": {
+            "parse": False,
+            "semanticRoundtrip": False,
+            "dialect": False,
+            "components": False,
+        },
+        "skipped": [],
+        "errors": [
+            {
+                "line": 1,
+                "column": 1,
+                "code": "read_error",
+                "message": str(exc),
+                "text": str(path),
+            }
+        ],
+        "validation": [],
+    }
+
+
+def _expand_verify_targets(targets: list[Path]) -> list[Path]:
+    paths: list[Path] = []
+    for target in targets:
+        if target.is_dir():
+            paths.extend(sorted(path for path in target.rglob("*.gal") if path.is_file()))
+        else:
+            paths.append(target)
+    return sorted(dict.fromkeys(paths), key=lambda path: str(path))
+
+
+def _batch_report(reports: list[dict]) -> dict:
+    failed = [report for report in reports if not report["ok"]]
+    return {
+        "schema": "gal.verify_batch.v0",
+        "ok": not failed,
+        "count": len(reports),
+        "passed": len(reports) - len(failed),
+        "failed": len(failed),
+        "reports": reports,
+    }
 
 
 def _summary(document: dict) -> dict[str, int]:
