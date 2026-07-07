@@ -21,6 +21,7 @@ parser/renderer pair with semantic round-trip tests.
 - [docs/ROADMAP.md](docs/ROADMAP.md): implementation and refinement milestones.
 - [docs/GLOSSARY.md](docs/GLOSSARY.md): working terms and vocabulary.
 - [docs/dialects/](docs/dialects/): draft GAL dialect specifications.
+- [docs/schemas/](docs/schemas/): JSON Schema contracts for CLI payloads.
 - [examples/minimal.mal.gal](examples/minimal.mal.gal): minimal MAL dialect
   example using GAL:netlist syntax.
 - [examples/dialects/](examples/dialects/): minimal examples for draft dialects.

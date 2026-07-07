@@ -19,6 +19,7 @@
         <a href="ROADMAP.md">Roadmap</a>
         <a href="GLOSSARY.md">Glossary</a>
         <a href="dialects/">Dialects</a>
+        <a href="schemas/">Schemas</a>
         <a href="https://github.com/H-XX-D/GAL.Graph_Abstraction_Layer/blob/main/examples/minimal.mal.gal">Example</a>
       </nav>
     </header>
@@ -99,6 +100,10 @@
             <p>CAL, IAL: capabilities, grants, interfaces, schemas, and compatibility.</p>
           </article>
           <article>
+            <h3>Schema Contracts</h3>
+            <p>JSON Schemas for CLI payloads, registries, runtime state, and verification reports.</p>
+          </article>
+          <article>
             <h3>Assurance</h3>
             <p>QAL, FAL, GOVAL, RISKAL, AUDAL, VAL: quality, failure, governance, risk, audit, and verification.</p>
           </article>
@@ -122,10 +127,11 @@ setp watch0.delta 0.25</code></pre>
       </section>
 
       <section>
-        <h2>Next Milestone</h2>
+        <h2>Current Tooling</h2>
         <p>
-          The next release target is a parser and canonical renderer with
-          semantic round-trip tests for every line form.
+          The Python CLI parses, formats, verifies, converts, loads into an
+          in-memory runtime, and publishes schema contracts for adapter-facing
+          JSON payloads.
         </p>
       </section>
     </main>
