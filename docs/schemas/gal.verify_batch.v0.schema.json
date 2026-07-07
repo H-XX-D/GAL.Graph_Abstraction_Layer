@@ -1,0 +1,218 @@
+{
+  "$id": "gal.verify_batch.v0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Structured report emitted by gal verify-all --json.",
+  "properties": {
+    "count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "failed": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "passed": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "reports": {
+      "items": {
+        "$id": "gal.verify_report.v0",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "description": "Structured report emitted by gal verify --json.",
+        "properties": {
+          "checks": {
+            "additionalProperties": false,
+            "properties": {
+              "components": {
+                "type": "boolean"
+              },
+              "dialect": {
+                "type": "boolean"
+              },
+              "parse": {
+                "type": "boolean"
+              },
+              "semanticRoundtrip": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "parse",
+              "semanticRoundtrip",
+              "dialect",
+              "components"
+            ],
+            "type": "object"
+          },
+          "dialect": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "error": {
+            "type": "string"
+          },
+          "errors": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "column": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "line": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "line",
+                "column",
+                "code",
+                "message",
+                "text"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "path": {
+            "type": "string"
+          },
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "skipped": {
+            "items": {
+              "enum": [
+                "dialect",
+                "components"
+              ]
+            },
+            "type": "array"
+          },
+          "summary": {
+            "additionalProperties": false,
+            "properties": {
+              "edges": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "entries": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "nets": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "nodes": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "schedules": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "sets": {
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "entries",
+              "nodes",
+              "edges",
+              "nets",
+              "schedules",
+              "sets"
+            ],
+            "type": "object"
+          },
+          "validation": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "column": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "line": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "line",
+                "column",
+                "code",
+                "message",
+                "text"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "ok",
+          "path",
+          "schema",
+          "dialect",
+          "summary",
+          "checks",
+          "skipped",
+          "errors",
+          "validation"
+        ],
+        "title": "GAL verification report",
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "schema": {
+      "const": "gal.verify_batch.v0"
+    }
+  },
+  "required": [
+    "schema",
+    "ok",
+    "count",
+    "passed",
+    "failed",
+    "reports"
+  ],
+  "title": "GAL batch verification report",
+  "type": "object"
+}

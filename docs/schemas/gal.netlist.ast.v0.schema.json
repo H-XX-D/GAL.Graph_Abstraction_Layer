@@ -1,0 +1,58 @@
+{
+  "$id": "gal.netlist.ast.v0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "description": "Semantic AST emitted by gal parse --json and gal convert --to json.",
+  "properties": {
+    "dialect": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "edges": {
+      "type": "array"
+    },
+    "entries": {
+      "type": "array"
+    },
+    "gal": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "nets": {
+      "type": "array"
+    },
+    "nodes": {
+      "type": "array"
+    },
+    "schedules": {
+      "type": "array"
+    },
+    "schema": {
+      "const": "gal.netlist.ast.v0"
+    },
+    "sets": {
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "gal",
+    "dialect",
+    "entries",
+    "nodes",
+    "edges",
+    "nets",
+    "schedules",
+    "sets",
+    "metadata"
+  ],
+  "title": "GAL netlist AST",
+  "type": "object"
+}

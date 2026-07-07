@@ -1,0 +1,35 @@
+{
+  "schema": "gal.schemas.v0",
+  "schemas": [
+    {
+      "description": "Registry emitted by gal components --json.",
+      "id": "gal.components.v0",
+      "title": "GAL component registry"
+    },
+    {
+      "description": "Registry emitted by gal dialects --json.",
+      "id": "gal.dialects.v0",
+      "title": "GAL dialect registry"
+    },
+    {
+      "description": "Semantic AST emitted by gal parse --json and gal convert --to json.",
+      "id": "gal.netlist.ast.v0",
+      "title": "GAL netlist AST"
+    },
+    {
+      "description": "Runtime shape emitted by gal load --mode replay and merge.",
+      "id": "gal.runtime.v0",
+      "title": "GAL in-memory runtime"
+    },
+    {
+      "description": "Structured report emitted by gal verify-all --json.",
+      "id": "gal.verify_batch.v0",
+      "title": "GAL batch verification report"
+    },
+    {
+      "description": "Structured report emitted by gal verify --json.",
+      "id": "gal.verify_report.v0",
+      "title": "GAL verification report"
+    }
+  ]
+}

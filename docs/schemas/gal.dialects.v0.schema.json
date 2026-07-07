@@ -1,0 +1,74 @@
+{
+  "$id": "gal.dialects.v0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Registry emitted by gal dialects --json.",
+  "properties": {
+    "dialects": {
+      "additionalProperties": {
+        "additionalProperties": true,
+        "properties": {
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "netOps": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "nodeKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "relations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "signals": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "standingOps": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "threads": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "type": "object"
+    },
+    "schema": {
+      "const": "gal.dialects.v0"
+    }
+  },
+  "required": [
+    "schema",
+    "dialects"
+  ],
+  "title": "GAL dialect registry",
+  "type": "object"
+}

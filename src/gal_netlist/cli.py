@@ -13,7 +13,7 @@ from .dialects import default_dialect_dirs, load_registry, validate_document
 from .loader import LOAD_MODES, load_document
 from .parser import parse_text
 from .renderer import render_document
-from .schemas import get_schema, schema_ids, schema_index
+from .schemas import get_schema, schema_ids, schema_index, write_schemas
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -51,6 +51,7 @@ def main(argv: list[str] | None = None) -> int:
     schemas_cmd = subparsers.add_parser("schemas", help="list or emit JSON Schema contracts")
     schemas_cmd.add_argument("schema_id", nargs="?", help="schema id to emit")
     schemas_cmd.add_argument("--json", action="store_true", help="emit JSON schema index")
+    schemas_cmd.add_argument("--write-dir", type=Path, help="write schema JSON files into a directory")
 
     convert_cmd = subparsers.add_parser("convert", help="convert GAL to another representation")
     convert_cmd.add_argument("path", type=Path)
@@ -95,6 +96,14 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "schemas":
+        if args.write_dir:
+            written = write_schemas(args.write_dir, args.schema_id)
+            if written is None:
+                print(json.dumps({"ok": False, "error": "unknown_schema", "schema": args.schema_id}, indent=2), file=sys.stderr)
+                return 1
+            for path in written:
+                print(path)
+            return 0
         if args.schema_id:
             schema = get_schema(args.schema_id)
             if schema is None:

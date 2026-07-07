@@ -6,7 +6,7 @@ from .parser import GalParseError, parse_text
 from .renderer import render_document
 from .dialects import DialectRegistry, ValidationIssue, load_registry, validate_document
 from .loader import LOAD_MODES, load_document
-from .schemas import get_schema, schema_ids, schema_index
+from .schemas import get_schema, schema_filename, schema_ids, schema_index, write_schemas
 
 __all__ = [
     "DialectRegistry",
@@ -20,6 +20,7 @@ __all__ = [
     "load_registry",
     "parse_text",
     "render_document",
+    "schema_filename",
     "schema_ids",
     "schema_index",
     "to_cypher",
@@ -27,4 +28,5 @@ __all__ = [
     "to_yaml",
     "validate_components",
     "validate_document",
+    "write_schemas",
 ]

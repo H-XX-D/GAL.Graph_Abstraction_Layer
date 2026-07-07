@@ -108,6 +108,7 @@ gal dialects
 gal dialects --json
 gal schemas
 gal schemas gal.verify_report.v0
+gal schemas --write-dir docs/schemas
 ```
 
 The current CLI shape is:
@@ -133,6 +134,7 @@ gal dialects
 gal dialects --json
 gal schemas
 gal schemas gal.verify_batch.v0
+gal schemas --write-dir docs/schemas
 ```
 
 `gal verify` parses, canonicalizes, checks semantic round-trip, and validates the
@@ -164,3 +166,5 @@ published by `gal schemas`.
 `gal schemas` lists the machine-readable JSON Schema contracts for the current
 CLI payloads. Pass a schema id, such as `gal.verify_report.v0`, to emit that
 schema as JSON.
+Use `gal schemas --write-dir docs/schemas` to regenerate the static schema files
+published by GitHub Pages.

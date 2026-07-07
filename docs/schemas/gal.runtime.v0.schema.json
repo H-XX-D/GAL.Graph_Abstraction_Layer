@@ -1,0 +1,43 @@
+{
+  "$id": "gal.runtime.v0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "description": "Runtime shape emitted by gal load --mode replay and merge.",
+  "properties": {
+    "dialect": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "edges": {
+      "type": "array"
+    },
+    "nets": {
+      "type": "object"
+    },
+    "nodes": {
+      "type": "object"
+    },
+    "schedules": {
+      "type": "object"
+    },
+    "schema": {
+      "const": "gal.runtime.v0"
+    },
+    "sets": {
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "dialect",
+    "nodes",
+    "edges",
+    "nets",
+    "schedules",
+    "sets"
+  ],
+  "title": "GAL in-memory runtime",
+  "type": "object"
+}

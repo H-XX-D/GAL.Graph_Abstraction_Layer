@@ -36,6 +36,7 @@ jobs:
           gal components --json >/dev/null
           gal schemas --json >/dev/null
           gal schemas gal.verify_report.v0 >/dev/null
+          test -f docs/schemas/gal.verify_report.v0.schema.json
           gal convert examples/minimal.mal.gal --to json >/dev/null
           gal convert examples/minimal.mal.gal --to dot >/dev/null
           gal convert examples/minimal.mal.gal --to yaml >/dev/null

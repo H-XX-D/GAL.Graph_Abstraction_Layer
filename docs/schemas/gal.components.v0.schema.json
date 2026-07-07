@@ -1,0 +1,103 @@
+{
+  "$id": "gal.components.v0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Registry emitted by gal components --json.",
+  "properties": {
+    "netOps": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "arity": {
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "kind": {
+            "const": "net_op"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "name",
+          "arity",
+          "version",
+          "sources"
+        ],
+        "type": "object"
+      },
+      "type": "object"
+    },
+    "schema": {
+      "const": "gal.components.v0"
+    },
+    "standingOps": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "standing_op"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "threads": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "threadsBySource": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "name",
+          "threads",
+          "threadsBySource",
+          "version",
+          "sources"
+        ],
+        "type": "object"
+      },
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema",
+    "netOps",
+    "standingOps"
+  ],
+  "title": "GAL component registry",
+  "type": "object"
+}

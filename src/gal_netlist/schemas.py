@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 from copy import deepcopy
+from pathlib import Path
 from typing import Any
 
 
@@ -30,6 +32,35 @@ def schema_index() -> dict[str, Any]:
             for schema_id in schema_ids()
         ],
     }
+
+
+def write_schemas(output_dir: Path, schema_id: str | None = None) -> list[Path] | None:
+    ids = [schema_id] if schema_id else schema_ids()
+    if any(item not in SCHEMAS for item in ids):
+        return None
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    written: list[Path] = []
+    if schema_id is None:
+        index_path = output_dir / "index.json"
+        _write_json(index_path, schema_index())
+        written.append(index_path)
+
+    for item in ids:
+        path = output_dir / schema_filename(item)
+        _write_json(path, get_schema(item))
+        written.append(path)
+    return written
+
+
+def schema_filename(schema_id: str) -> str:
+    return f"{schema_id}.schema.json"
+
+
+def _write_json(path: Path, payload: dict[str, Any] | None) -> None:
+    if payload is None:
+        raise ValueError(f"missing schema for {path}")
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 SUMMARY_SCHEMA = {

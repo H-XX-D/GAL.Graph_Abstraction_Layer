@@ -1,9 +1,13 @@
 import json
+from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
 from gal_netlist.cli import main
-from gal_netlist.schemas import get_schema, schema_ids, schema_index
+from gal_netlist.schemas import get_schema, schema_filename, schema_ids, schema_index, write_schemas
+
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _cli_json(args: list[str], capsys):
@@ -22,6 +26,7 @@ def test_schema_registry_lists_core_contracts():
     ]
     assert schema_index()["schema"] == "gal.schemas.v0"
     assert get_schema("gal.verify_report.v0")["$id"] == "gal.verify_report.v0"
+    assert schema_filename("gal.verify_report.v0") == "gal.verify_report.v0.schema.json"
 
 
 def test_all_schemas_are_valid_json_schemas():
@@ -65,6 +70,42 @@ def test_cli_schemas_reports_unknown_schema(capsys):
     payload = json.loads(capsys.readouterr().err)
 
     assert payload == {"ok": False, "error": "unknown_schema", "schema": "missing.v0"}
+
+
+def test_write_schemas_exports_index_and_schema_files(tmp_path):
+    written = write_schemas(tmp_path)
+
+    assert written is not None
+    assert (tmp_path / "index.json").exists()
+    assert (tmp_path / "gal.verify_report.v0.schema.json").exists()
+    assert json.loads((tmp_path / "index.json").read_text(encoding="utf-8"))["schema"] == "gal.schemas.v0"
+    assert json.loads((tmp_path / "gal.verify_report.v0.schema.json").read_text(encoding="utf-8"))["$id"] == "gal.verify_report.v0"
+
+
+def test_cli_schemas_write_dir_exports_files(tmp_path, capsys):
+    assert main(["schemas", "--write-dir", str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+
+    assert "index.json" in out
+    assert "gal.verify_batch.v0.schema.json" in out
+    assert (tmp_path / "gal.verify_batch.v0.schema.json").exists()
+
+
+def test_cli_schemas_write_dir_exports_single_schema(tmp_path, capsys):
+    assert main(["schemas", "gal.verify_report.v0", "--write-dir", str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+
+    assert "gal.verify_report.v0.schema.json" in out
+    assert not (tmp_path / "index.json").exists()
+    assert json.loads((tmp_path / "gal.verify_report.v0.schema.json").read_text(encoding="utf-8"))["$id"] == "gal.verify_report.v0"
+
+
+def test_docs_schemas_are_in_sync_with_registry():
+    docs_dir = ROOT / "docs" / "schemas"
+
+    assert json.loads((docs_dir / "index.json").read_text(encoding="utf-8")) == schema_index()
+    for schema_id in schema_ids():
+        assert json.loads((docs_dir / schema_filename(schema_id)).read_text(encoding="utf-8")) == get_schema(schema_id)
 
 
 def test_cli_payloads_validate_against_published_schemas(capsys):
