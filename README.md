@@ -97,6 +97,7 @@ gal parse examples/dialects/hal.gal --json
 gal format examples/dialects/hal.gal
 gal convert examples/dialects/hal.gal --to dot
 gal convert examples/dialects/hal.gal --to yaml
+gal convert ast.json --from json --to gal
 gal dialects
 ```
 
@@ -109,6 +110,7 @@ gal verify graph.gal
 gal convert graph.gal --to json
 gal convert graph.gal --to dot
 gal convert graph.gal --to yaml
+gal convert ast.json --from json --to gal
 gal dialects
 ```
 

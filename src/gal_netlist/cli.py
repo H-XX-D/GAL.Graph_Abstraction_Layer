@@ -34,7 +34,8 @@ def main(argv: list[str] | None = None) -> int:
 
     convert_cmd = subparsers.add_parser("convert", help="convert GAL to another representation")
     convert_cmd.add_argument("path", type=Path)
-    convert_cmd.add_argument("--to", choices=["json", "dot", "yaml"], required=True)
+    convert_cmd.add_argument("--from", dest="from_format", choices=["gal", "json"], default="gal")
+    convert_cmd.add_argument("--to", choices=["gal", "json", "dot", "yaml"], required=True)
 
     args = parser.parse_args(argv)
     if args.command == "dialects":
@@ -44,10 +45,13 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     text = args.path.read_text(encoding="utf-8")
-    document = parse_text(text)
-    if document["errors"]:
-        print(json.dumps({"ok": False, "errors": document["errors"]}, indent=2), file=sys.stderr)
-        return 1
+    if args.command == "convert" and args.from_format == "json":
+        document = json.loads(text)
+    else:
+        document = parse_text(text)
+        if document["errors"]:
+            print(json.dumps({"ok": False, "errors": document["errors"]}, indent=2), file=sys.stderr)
+            return 1
 
     if args.command == "parse":
         if args.json:
@@ -83,7 +87,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "convert":
         semantic_document = _semantic_document(document)
-        if args.to == "json":
+        if args.to == "gal":
+            sys.stdout.write(render_document(semantic_document))
+        elif args.to == "json":
             print(json.dumps(semantic_document, indent=2, sort_keys=True))
         elif args.to == "dot":
             sys.stdout.write(to_dot(semantic_document))

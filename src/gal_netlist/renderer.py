@@ -10,7 +10,7 @@ def render_document(document: dict[str, Any]) -> str:
 
     lines: list[str] = []
     current_node: str | None = None
-    for entry in document.get("entries", []):
+    for entry in _render_entries(document):
         form = entry["form"]
         if form == "header":
             lines.append(f"@{entry['key']} {entry['value']}")
@@ -34,6 +34,23 @@ def render_document(document: dict[str, Any]) -> str:
             lines.append(f"setp {entry['target']}.{entry['param']} {_render_value(entry['value'])}")
             current_node = None
     return "\n".join(lines) + ("\n" if lines else "")
+
+
+def _render_entries(document: dict[str, Any]) -> list[dict[str, Any]]:
+    if document.get("entries"):
+        return document["entries"]
+
+    entries: list[dict[str, Any]] = []
+    if document.get("gal"):
+        entries.append({"form": "header", "key": "gal", "value": document["gal"]})
+    if document.get("dialect"):
+        entries.append({"form": "header", "key": "dialect", "value": document["dialect"]})
+    entries.extend(document.get("nodes", []))
+    entries.extend(document.get("edges", []))
+    entries.extend(document.get("nets", []))
+    entries.extend(document.get("schedules", []))
+    entries.extend(document.get("sets", []))
+    return entries
 
 
 def _render_node(entry: dict[str, Any]) -> str:

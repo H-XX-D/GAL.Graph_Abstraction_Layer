@@ -1,8 +1,10 @@
+import json
 from pathlib import Path
 
 from gal_netlist.cli import main
 from gal_netlist.converters import to_dot, to_yaml
 from gal_netlist.parser import parse_text
+from gal_netlist.renderer import render_document
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,3 +49,34 @@ def test_all_examples_convert_to_dot_and_yaml():
         document = parse_text(path.read_text(encoding="utf-8"))
         assert to_dot(document).startswith("digraph G {\n"), path
         assert "schema: gal.netlist.ast.v0\n" in to_yaml(document), path
+
+
+def test_cli_convert_json_ast_back_to_gal(tmp_path, capsys):
+    source_path = ROOT / "examples" / "minimal.mal.gal"
+    assert main(["convert", str(source_path), "--to", "json"]) == 0
+    json_text = capsys.readouterr().out
+    ast_path = tmp_path / "minimal.ast.json"
+    ast_path.write_text(json_text, encoding="utf-8")
+
+    assert main(["convert", str(ast_path), "--from", "json", "--to", "gal"]) == 0
+    gal_text = capsys.readouterr().out
+    assert '@dialect mal.v0\n' in gal_text
+    assert 'claim_ab12 "API is degraded"' in gal_text
+
+    reparsed = parse_text(gal_text)
+    assert reparsed["errors"] == []
+
+
+def test_section_only_json_ast_renders_to_gal():
+    ast = {
+        "schema": "gal.netlist.ast.v0",
+        "gal": "netlist.v0",
+        "dialect": "mal.v0",
+        "nodes": [{"form": "node", "id": "claim_a", "label": "A", "fields": [], "params": [{"key": "kind", "values": ["claim"]}]}],
+        "edges": [{"form": "edge", "source": "claim_a", "relation": "supports", "direction": "fwd", "target": "obs_b", "weight": 0.8}],
+        "nets": [],
+        "schedules": [],
+        "sets": [],
+    }
+    rendered = render_document(json.loads(json.dumps(ast)))
+    assert rendered == '@gal netlist.v0\n@dialect mal.v0\nclaim_a "A" [kind: claim]\nclaim_a supports> obs_b(0.8)\n'
