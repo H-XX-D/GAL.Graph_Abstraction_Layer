@@ -167,6 +167,8 @@ operation arity.
 GitHub Actions runs the same core checks on push and pull request: unit tests,
 package build verification, `gal verify-all examples --json`, and CLI smoke
 commands.
+CI also installs the built wheel in a temporary environment and checks that the
+bundled dialect registry works outside a source checkout.
 The test suite also validates emitted CLI payloads against the JSON Schemas
 published by `gal schemas`.
 

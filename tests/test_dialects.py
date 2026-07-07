@@ -70,6 +70,14 @@ def test_default_dialect_dirs_finds_repo_docs():
     assert ROOT / "docs" / "dialects" in candidates
 
 
+def test_default_dialect_dirs_include_bundled_specs_outside_repo(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    candidates = default_dialect_dirs(tmp_path / "minimal.mal.gal")
+    registry = load_registry(candidates)
+    assert "mal.v0" in registry.ids()
+    assert "hal.v0" in registry.ids()
+
+
 def test_cli_dialects_json_outputs_registry(capsys):
     assert main(["dialects", "--dialect-dir", str(ROOT / "docs" / "dialects"), "--json"]) == 0
     payload = json.loads(capsys.readouterr().out)

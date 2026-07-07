@@ -87,6 +87,7 @@ Static schema files are published under `docs/schemas/`.
 
 - Run `python -m pytest -q` in CI.
 - Build the source distribution and wheel in CI.
+- Smoke-test the built wheel from a temporary install outside the checkout.
 - Run `gal verify-all examples --json` in CI.
 - Smoke registry, conversion, and loader CLI commands in CI.
 - Publish schema contracts for adapter-facing JSON payloads.

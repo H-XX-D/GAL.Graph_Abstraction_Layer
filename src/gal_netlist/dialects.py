@@ -5,12 +5,15 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass
+from importlib.resources import files
+from importlib.resources.abc import Traversable
 from pathlib import Path
 from typing import Any, Iterable
 
 
 VOCAB_RE = re.compile(r"```json\s*(\{.*?\})\s*```", re.DOTALL)
 DIALECT_REGISTRY_SCHEMA = "gal.dialects.v0"
+DialectSource = Path | Traversable
 
 
 @dataclass(frozen=True)
@@ -50,28 +53,32 @@ class DialectRegistry:
         }
 
 
-def load_registry(dialect_dirs: Iterable[Path]) -> DialectRegistry:
+def load_registry(dialect_dirs: Iterable[DialectSource]) -> DialectRegistry:
     specs: dict[str, dict[str, Any]] = {}
     for directory in dialect_dirs:
-        if not directory.exists():
-            continue
-        for path in sorted(directory.glob("*.md")):
+        for path in _markdown_specs(directory):
             spec = _load_markdown_spec(path)
             if spec is not None:
                 specs[spec["id"]] = spec
     return DialectRegistry(specs)
 
 
-def default_dialect_dirs(input_path: Path) -> list[Path]:
-    """Find local docs/dialects directories from cwd and the input path."""
+def default_dialect_dirs(input_path: Path) -> list[DialectSource]:
+    """Find local docs/dialects directories plus bundled package defaults."""
 
-    candidates: list[Path] = []
+    candidates: list[DialectSource] = []
+    seen: set[str] = set()
     roots = [Path.cwd(), input_path.resolve().parent]
     for root in roots:
         for parent in [root, *root.parents]:
             candidate = parent / "docs" / "dialects"
-            if candidate not in candidates:
+            key = str(candidate)
+            if key not in seen:
                 candidates.append(candidate)
+                seen.add(key)
+    bundled = files("gal_netlist").joinpath("data", "dialects")
+    if str(bundled) not in seen:
+        candidates.append(bundled)
     return candidates
 
 
@@ -132,7 +139,21 @@ def validate_document(document: dict[str, Any], registry: DialectRegistry) -> li
     return issues
 
 
-def _load_markdown_spec(path: Path) -> dict[str, Any] | None:
+def _markdown_specs(directory: DialectSource) -> list[DialectSource]:
+    try:
+        if not directory.exists() or not directory.is_dir():
+            return []
+        if isinstance(directory, Path):
+            return sorted(directory.glob("*.md"))
+        return sorted(
+            (child for child in directory.iterdir() if child.is_file() and child.name.endswith(".md")),
+            key=lambda child: child.name,
+        )
+    except OSError:
+        return []
+
+
+def _load_markdown_spec(path: DialectSource) -> dict[str, Any] | None:
     text = path.read_text(encoding="utf-8")
     match = VOCAB_RE.search(text)
     if not match:

@@ -30,6 +30,20 @@ jobs:
       - name: Build package
         run: python -m build
 
+      - name: Smoke installed wheel
+        run: |
+          tmpdir="$(mktemp -d)"
+          python -m venv "$tmpdir/venv"
+          "$tmpdir/venv/bin/python" -m pip install dist/*.whl
+          cat > "$tmpdir/minimal.mal.gal" <<'EOF'
+          @gal netlist.v0
+          @dialect mal.v0
+          claim_1 "Claim" [kind: claim]
+          EOF
+          cd "$tmpdir"
+          "$tmpdir/venv/bin/gal" dialects --json | "$tmpdir/venv/bin/python" -c 'import json, sys; assert "mal.v0" in json.load(sys.stdin)["dialects"]'
+          "$tmpdir/venv/bin/gal" verify minimal.mal.gal --json
+
       - name: Verify examples
         run: gal verify-all examples --json
 
