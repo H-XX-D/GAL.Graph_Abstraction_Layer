@@ -228,6 +228,36 @@ DOCTOR_SCHEMA = {
     "additionalProperties": False,
 }
 
+INIT_REPORT_SCHEMA = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "gal.init_report.v0",
+    "title": "GAL init report",
+    "description": "Structured report emitted by gal init --json.",
+    "type": "object",
+    "required": ["schema", "ok", "path", "dialect", "created", "overwritten", "node", "error", "message"],
+    "properties": {
+        "schema": {"const": "gal.init_report.v0"},
+        "ok": {"type": "boolean"},
+        "path": {"type": "string"},
+        "dialect": {"type": "string"},
+        "created": {"type": "boolean"},
+        "overwritten": {"type": "boolean"},
+        "node": {
+            "type": ["object", "null"],
+            "required": ["id", "kind", "label"],
+            "properties": {
+                "id": {"type": "string"},
+                "kind": {"type": "string"},
+                "label": {"type": "string"},
+            },
+            "additionalProperties": False,
+        },
+        "error": {"type": ["string", "null"]},
+        "message": {"type": ["string", "null"]},
+    },
+    "additionalProperties": False,
+}
+
 COMPONENT_SCHEMA = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "gal.components.v0",
@@ -320,6 +350,7 @@ SCHEMAS = {
     "gal.components.v0": COMPONENT_SCHEMA,
     "gal.dialects.v0": DIALECT_REGISTRY_SCHEMA,
     "gal.doctor.v0": DOCTOR_SCHEMA,
+    "gal.init_report.v0": INIT_REPORT_SCHEMA,
     "gal.netlist.ast.v0": AST_SCHEMA,
     "gal.runtime.v0": RUNTIME_SCHEMA,
     "gal.verify_batch.v0": VERIFY_BATCH_SCHEMA,

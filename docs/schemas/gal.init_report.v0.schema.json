@@ -1,0 +1,74 @@
+{
+  "$id": "gal.init_report.v0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Structured report emitted by gal init --json.",
+  "properties": {
+    "created": {
+      "type": "boolean"
+    },
+    "dialect": {
+      "type": "string"
+    },
+    "error": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "message": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "node": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "label"
+      ],
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "overwritten": {
+      "type": "boolean"
+    },
+    "path": {
+      "type": "string"
+    },
+    "schema": {
+      "const": "gal.init_report.v0"
+    }
+  },
+  "required": [
+    "schema",
+    "ok",
+    "path",
+    "dialect",
+    "created",
+    "overwritten",
+    "node",
+    "error",
+    "message"
+  ],
+  "title": "GAL init report",
+  "type": "object"
+}

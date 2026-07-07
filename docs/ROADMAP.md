@@ -84,7 +84,8 @@ and pull request.
 Static schema files are published under `docs/schemas/`.
 `gal --version` reports the installed CLI version for diagnostics.
 `gal doctor` reports version, runtime, dialect, schema, and docs-schema health.
-`gal init` creates starter GAL files from the registered dialect vocabulary.
+`gal init` creates starter GAL files from the registered dialect vocabulary and
+can emit structured JSON reports.
 
 - Run `python -m pytest -q` in CI.
 - Build the source distribution and wheel in CI.

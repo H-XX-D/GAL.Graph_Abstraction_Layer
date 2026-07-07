@@ -35,6 +35,7 @@ def main(argv: list[str] | None = None) -> int:
     init_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
     init_cmd.add_argument("--force", action="store_true", help="overwrite an existing file")
     init_cmd.add_argument("--parents", action="store_true", help="create parent directories")
+    init_cmd.add_argument("--json", action="store_true", help="emit JSON init report")
 
     verify_cmd = subparsers.add_parser("verify", help="parse and semantic round-trip a GAL file")
     verify_cmd.add_argument("path", type=Path)
@@ -148,19 +149,57 @@ def main(argv: list[str] | None = None) -> int:
         registry = load_registry(args.dialect_dir or default_dialect_dirs(args.path))
         spec = registry.get(args.dialect)
         if spec is None:
-            print(json.dumps({"ok": False, "error": "unknown_dialect", "dialect": args.dialect}, indent=2), file=sys.stderr)
+            report = _init_report(
+                ok=False,
+                path=args.path,
+                dialect=args.dialect,
+                created=False,
+                overwritten=False,
+                node=None,
+                error="unknown_dialect",
+            )
+            _print_init_report(report, args.json)
             return 1
         if args.path.exists() and not args.force:
-            print(json.dumps({"ok": False, "error": "file_exists", "path": str(args.path)}, indent=2), file=sys.stderr)
+            report = _init_report(
+                ok=False,
+                path=args.path,
+                dialect=args.dialect,
+                created=False,
+                overwritten=False,
+                node=None,
+                error="file_exists",
+            )
+            _print_init_report(report, args.json)
             return 1
+        overwritten = args.path.exists()
         if args.parents:
             args.path.parent.mkdir(parents=True, exist_ok=True)
+        node = _starter_node(spec)
         try:
-            args.path.write_text(_starter_text(args.dialect, spec), encoding="utf-8")
+            args.path.write_text(_starter_text(args.dialect, node), encoding="utf-8")
         except OSError as exc:
-            print(json.dumps({"ok": False, "error": "write_error", "path": str(args.path), "message": str(exc)}, indent=2), file=sys.stderr)
+            report = _init_report(
+                ok=False,
+                path=args.path,
+                dialect=args.dialect,
+                created=False,
+                overwritten=overwritten,
+                node=node,
+                error="write_error",
+                message=str(exc),
+            )
+            _print_init_report(report, args.json)
             return 1
-        print(f"created: {args.path}")
+        report = _init_report(
+            ok=True,
+            path=args.path,
+            dialect=args.dialect,
+            created=True,
+            overwritten=overwritten,
+            node=node,
+        )
+        _print_init_report(report, args.json)
         return 0
 
     if args.command == "verify-all":
@@ -442,12 +481,56 @@ def _find_docs_schemas_dir() -> Path | None:
     return None
 
 
-def _starter_text(dialect_id: str, spec: dict) -> str:
+def _print_init_report(report: dict, as_json: bool) -> None:
+    if as_json:
+        print(json.dumps(report, indent=2, sort_keys=True))
+    elif report["ok"]:
+        print(f"created: {report['path']}")
+    else:
+        payload = {"ok": False, "error": report["error"]}
+        if report["error"] == "unknown_dialect":
+            payload["dialect"] = report["dialect"]
+        else:
+            payload["path"] = report["path"]
+        if report.get("message"):
+            payload["message"] = report["message"]
+        print(json.dumps(payload, indent=2), file=sys.stderr)
+
+
+def _init_report(
+    *,
+    ok: bool,
+    path: Path,
+    dialect: str,
+    created: bool,
+    overwritten: bool,
+    node: dict | None,
+    error: str | None = None,
+    message: str | None = None,
+) -> dict:
+    return {
+        "schema": "gal.init_report.v0",
+        "ok": ok,
+        "path": str(path),
+        "dialect": dialect,
+        "created": created,
+        "overwritten": overwritten,
+        "node": node,
+        "error": error,
+        "message": message,
+    }
+
+
+def _starter_node(spec: dict) -> dict:
     node_kinds = spec.get("nodeKinds") or ["node"]
     kind = str(node_kinds[0])
     node_id = f"{_safe_identifier(kind)}_1"
     label = f"Starter {kind.replace('_', ' ')}"
-    return f'@gal netlist.v0\n@dialect {dialect_id}\n\n{node_id} "{label}" [kind: {kind}]\n'
+    return {"id": node_id, "kind": kind, "label": label}
+
+
+def _starter_text(dialect_id: str, node: dict) -> str:
+    return f'@gal netlist.v0\n@dialect {dialect_id}\n\n{node["id"]} "{node["label"]}" [kind: {node["kind"]}]\n'
 
 
 def _safe_identifier(value: str) -> str:

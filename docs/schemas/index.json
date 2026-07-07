@@ -17,6 +17,11 @@
       "title": "GAL doctor report"
     },
     {
+      "description": "Structured report emitted by gal init --json.",
+      "id": "gal.init_report.v0",
+      "title": "GAL init report"
+    },
+    {
       "description": "Semantic AST emitted by gal parse --json and gal convert --to json.",
       "id": "gal.netlist.ast.v0",
       "title": "GAL netlist AST"

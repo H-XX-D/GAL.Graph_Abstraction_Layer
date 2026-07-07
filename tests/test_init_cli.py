@@ -1,7 +1,10 @@
 import json
 from pathlib import Path
 
+from jsonschema import Draft202012Validator
+
 from gal_netlist.cli import main
+from gal_netlist.schemas import get_schema
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -21,6 +24,26 @@ def test_cli_init_creates_valid_default_mal_file(tmp_path, capsys):
     report = json.loads(capsys.readouterr().out)
     assert report["ok"] is True
     assert report["dialect"] == "mal.v0"
+
+
+def test_cli_init_json_outputs_success_report(tmp_path, capsys):
+    path = tmp_path / "starter.gal"
+
+    assert main(["init", str(path), "--json"]) == 0
+    report = json.loads(capsys.readouterr().out)
+
+    Draft202012Validator(get_schema("gal.init_report.v0")).validate(report)
+    assert report == {
+        "schema": "gal.init_report.v0",
+        "ok": True,
+        "path": str(path),
+        "dialect": "mal.v0",
+        "created": True,
+        "overwritten": False,
+        "node": {"id": "claim_1", "kind": "claim", "label": "Starter claim"},
+        "error": None,
+        "message": None,
+    }
 
 
 def test_cli_init_creates_valid_requested_dialect_file(tmp_path, capsys):
@@ -58,6 +81,19 @@ def test_cli_init_force_overwrites_existing_file(tmp_path, capsys):
     assert path.read_text(encoding="utf-8").startswith("@gal netlist.v0\n@dialect mal.v0\n")
 
 
+def test_cli_init_json_reports_forced_overwrite(tmp_path, capsys):
+    path = tmp_path / "starter.gal"
+    path.write_text("existing\n", encoding="utf-8")
+
+    assert main(["init", str(path), "--force", "--json"]) == 0
+    report = json.loads(capsys.readouterr().out)
+
+    Draft202012Validator(get_schema("gal.init_report.v0")).validate(report)
+    assert report["created"] is True
+    assert report["overwritten"] is True
+    assert report["node"]["kind"] == "claim"
+
+
 def test_cli_init_can_create_parent_directories(tmp_path, capsys):
     path = tmp_path / "nested" / "starter.gal"
 
@@ -75,6 +111,26 @@ def test_cli_init_reports_unknown_dialect(tmp_path, capsys):
 
     assert not path.exists()
     assert json.loads(captured.err) == {"ok": False, "error": "unknown_dialect", "dialect": "missing.v0"}
+
+
+def test_cli_init_json_reports_unknown_dialect(tmp_path, capsys):
+    path = tmp_path / "starter.gal"
+
+    assert main(["init", str(path), "--dialect", "missing.v0", "--json"]) == 1
+    report = json.loads(capsys.readouterr().out)
+
+    Draft202012Validator(get_schema("gal.init_report.v0")).validate(report)
+    assert report == {
+        "schema": "gal.init_report.v0",
+        "ok": False,
+        "path": str(path),
+        "dialect": "missing.v0",
+        "created": False,
+        "overwritten": False,
+        "node": None,
+        "error": "unknown_dialect",
+        "message": None,
+    }
 
 
 def test_cli_init_honors_explicit_dialect_dir(tmp_path, capsys):

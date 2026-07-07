@@ -20,6 +20,7 @@ def test_schema_registry_lists_core_contracts():
         "gal.components.v0",
         "gal.dialects.v0",
         "gal.doctor.v0",
+        "gal.init_report.v0",
         "gal.netlist.ast.v0",
         "gal.runtime.v0",
         "gal.verify_batch.v0",
@@ -109,10 +110,13 @@ def test_docs_schemas_are_in_sync_with_registry():
         assert json.loads((docs_dir / schema_filename(schema_id)).read_text(encoding="utf-8")) == get_schema(schema_id)
 
 
-def test_cli_payloads_validate_against_published_schemas(capsys):
+def test_cli_payloads_validate_against_published_schemas(tmp_path, capsys):
     Draft202012Validator(get_schema("gal.dialects.v0")).validate(_cli_json(["dialects", "--json"], capsys))
     Draft202012Validator(get_schema("gal.components.v0")).validate(_cli_json(["components", "--json"], capsys))
     Draft202012Validator(get_schema("gal.doctor.v0")).validate(_cli_json(["doctor", "--json"], capsys))
+    Draft202012Validator(get_schema("gal.init_report.v0")).validate(
+        _cli_json(["init", str(tmp_path / "starter.gal"), "--json"], capsys)
+    )
     Draft202012Validator(get_schema("gal.verify_report.v0")).validate(
         _cli_json(["verify", "examples/minimal.mal.gal", "--json"], capsys)
     )

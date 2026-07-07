@@ -97,7 +97,7 @@ python3 -m build
 gal --version
 gal doctor --json
 gal init starter.mal.gal
-gal init starter.hal.gal --dialect hal.v0
+gal init starter.hal.gal --dialect hal.v0 --json
 gal verify examples/minimal.mal.gal
 gal verify examples/minimal.mal.gal --json
 gal verify-all examples --json
@@ -124,6 +124,7 @@ gal --version
 gal doctor
 gal init graph.gal
 gal init graph.gal --dialect hal.v0 --force
+gal init graph.gal --json
 gal parse graph.gal --json
 gal format graph.gal
 gal verify graph.gal
@@ -160,7 +161,8 @@ files, and returns a batch report.
 
 `gal init` creates a starter GAL file for a registered dialect. It defaults to
 `mal.v0`, refuses to overwrite existing files unless `--force` is supplied, and
-can create missing parent directories with `--parents`.
+can create missing parent directories with `--parents`. Use `--json` to emit a
+structured `gal.init_report.v0` report for scripts and adapters.
 
 `gal load` is currently an in-memory loader contract. It reports intended
 changes for `plan`, checks runtime agreement for `verify`, builds a fresh
