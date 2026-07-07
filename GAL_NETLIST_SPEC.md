@@ -520,6 +520,7 @@ runtime domain.
 | `aal.v0` | Agent Abstraction Layer | agents, tools, tasks, handoffs |
 | `wal.v0` | Workflow Abstraction Layer | steps, jobs, gates, retries |
 | `oal.v0` | Observability Abstraction Layer | signals, alerts, traces, monitors |
+| `hal.v0` | Hardware Abstraction Layer | devices, buses, drivers, firmware, capabilities |
 | `ral.v0` | Resource Abstraction Layer | compute, storage, network, quota |
 | `sal.v0` | State Abstraction Layer | state, snapshots, migrations, consistency |
 | `eal.v0` | Event Abstraction Layer | events, streams, triggers, replay |

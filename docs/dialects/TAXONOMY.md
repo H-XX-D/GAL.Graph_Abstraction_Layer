@@ -9,6 +9,7 @@ These describe reusable graph-runtime primitives.
 
 | dialect | focus |
 |---|---|
+| `hal.v0` | hardware substrate and driver boundaries |
 | `mal.v0` | memory graphs |
 | `kal.v0` | knowledge and provenance |
 | `real.v0` | reasoning traces and decisions |
@@ -49,6 +50,7 @@ These describe quality, risk, verification, and accountability.
 Start with the dialect that owns the primary graph question:
 
 - "What is deployed?" -> DAL.
+- "What substrate can run this?" -> HAL.
 - "What can act?" -> CAL.
 - "What happened?" -> EAL or AUDAL.
 - "What is broken?" -> OAL or FAL.
