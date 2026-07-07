@@ -78,13 +78,15 @@ derived from the loaded dialect vocabularies.
 ## Phase 5: Project Automation
 
 Status: initial CI workflow landed. GitHub Actions runs unit tests, batch
-fixture verification, and CLI smoke checks on push and pull request.
+fixture verification, package build verification, and CLI smoke checks on push
+and pull request.
 `gal schemas` exposes JSON Schema contracts for CLI payloads and runtime data.
 Static schema files are published under `docs/schemas/`.
 `gal --version` reports the installed CLI version for diagnostics.
 `gal doctor` reports version, runtime, dialect, schema, and docs-schema health.
 
 - Run `python -m pytest -q` in CI.
+- Build the source distribution and wheel in CI.
 - Run `gal verify-all examples --json` in CI.
 - Smoke registry, conversion, and loader CLI commands in CI.
 - Publish schema contracts for adapter-facing JSON payloads.

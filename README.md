@@ -93,6 +93,7 @@ Run the current checks:
 
 ```bash
 python3 -m pytest -q
+python3 -m build
 gal --version
 gal doctor --json
 gal verify examples/minimal.mal.gal
@@ -164,7 +165,8 @@ vocabularies. The registry currently covers reusable `netOps` and
 operation arity.
 
 GitHub Actions runs the same core checks on push and pull request: unit tests,
-`gal verify-all examples --json`, and CLI smoke commands.
+package build verification, `gal verify-all examples --json`, and CLI smoke
+commands.
 The test suite also validates emitted CLI payloads against the JSON Schemas
 published by `gal schemas`.
 

@@ -27,6 +27,9 @@ jobs:
       - name: Run tests
         run: python -m pytest -q
 
+      - name: Build package
+        run: python -m build
+
       - name: Verify examples
         run: gal verify-all examples --json
 
