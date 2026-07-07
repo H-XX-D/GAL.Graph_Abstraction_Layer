@@ -7,6 +7,7 @@ import json
 import sys
 from pathlib import Path
 
+from .converters import to_dot, to_yaml
 from .dialects import default_dialect_dirs, load_registry, validate_document
 from .parser import parse_text
 from .renderer import render_document
@@ -33,7 +34,7 @@ def main(argv: list[str] | None = None) -> int:
 
     convert_cmd = subparsers.add_parser("convert", help="convert GAL to another representation")
     convert_cmd.add_argument("path", type=Path)
-    convert_cmd.add_argument("--to", choices=["json"], required=True)
+    convert_cmd.add_argument("--to", choices=["json", "dot", "yaml"], required=True)
 
     args = parser.parse_args(argv)
     if args.command == "dialects":
@@ -81,7 +82,13 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "convert":
-        print(json.dumps(_semantic_document(document), indent=2, sort_keys=True))
+        semantic_document = _semantic_document(document)
+        if args.to == "json":
+            print(json.dumps(semantic_document, indent=2, sort_keys=True))
+        elif args.to == "dot":
+            sys.stdout.write(to_dot(semantic_document))
+        elif args.to == "yaml":
+            sys.stdout.write(to_yaml(semantic_document))
         return 0
 
     return 2

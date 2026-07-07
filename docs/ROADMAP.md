@@ -47,10 +47,13 @@ net operations, standing operations, and threads.
 
 ## Phase 3: Conversion
 
+Status: initial JSON, DOT, and YAML export support landed. Conversion currently
+starts from GAL text and routes through the parsed semantic AST.
+
 - Convert GAL text to JSON AST.
-- Convert JSON AST to canonical GAL text.
 - Export DOT for visualization.
 - Export YAML for configuration exchange.
+- Convert JSON AST to canonical GAL text.
 - Prototype Cypher export for graph database import.
 
 ## Phase 4: Runtime Integration

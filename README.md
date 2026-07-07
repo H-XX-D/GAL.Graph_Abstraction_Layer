@@ -95,6 +95,8 @@ python3 -m pytest -q
 gal verify examples/minimal.mal.gal
 gal parse examples/dialects/hal.gal --json
 gal format examples/dialects/hal.gal
+gal convert examples/dialects/hal.gal --to dot
+gal convert examples/dialects/hal.gal --to yaml
 gal dialects
 ```
 
@@ -105,6 +107,8 @@ gal parse graph.gal --json
 gal format graph.gal
 gal verify graph.gal
 gal convert graph.gal --to json
+gal convert graph.gal --to dot
+gal convert graph.gal --to yaml
 gal dialects
 ```
 
