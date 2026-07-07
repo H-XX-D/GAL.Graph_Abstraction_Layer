@@ -13,6 +13,7 @@ from .dialects import default_dialect_dirs, load_registry, validate_document
 from .loader import LOAD_MODES, load_document
 from .parser import parse_text
 from .renderer import render_document
+from .schemas import get_schema, schema_ids, schema_index
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -46,6 +47,10 @@ def main(argv: list[str] | None = None) -> int:
     components_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
     components_cmd.add_argument("--kind", choices=["all", "net-op", "standing-op"], default="all")
     components_cmd.add_argument("--json", action="store_true", help="emit JSON component registry")
+
+    schemas_cmd = subparsers.add_parser("schemas", help="list or emit JSON Schema contracts")
+    schemas_cmd.add_argument("schema_id", nargs="?", help="schema id to emit")
+    schemas_cmd.add_argument("--json", action="store_true", help="emit JSON schema index")
 
     convert_cmd = subparsers.add_parser("convert", help="convert GAL to another representation")
     convert_cmd.add_argument("path", type=Path)
@@ -87,6 +92,21 @@ def main(argv: list[str] | None = None) -> int:
             for name, component in sorted(components.standing_ops.items()):
                 threads = ",".join(sorted(component.threads_for(None)))
                 print(f"standing_op {name} threads={threads} sources={','.join(sorted(component.sources))}")
+        return 0
+
+    if args.command == "schemas":
+        if args.schema_id:
+            schema = get_schema(args.schema_id)
+            if schema is None:
+                print(json.dumps({"ok": False, "error": "unknown_schema", "schema": args.schema_id}, indent=2), file=sys.stderr)
+                return 1
+            print(json.dumps(schema, indent=2, sort_keys=True))
+            return 0
+        if args.json:
+            print(json.dumps(schema_index(), indent=2, sort_keys=True))
+            return 0
+        for schema_id in schema_ids():
+            print(schema_id)
         return 0
 
     if args.command == "verify-all":

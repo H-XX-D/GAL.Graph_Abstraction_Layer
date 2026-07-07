@@ -79,10 +79,12 @@ derived from the loaded dialect vocabularies.
 
 Status: initial CI workflow landed. GitHub Actions runs unit tests, batch
 fixture verification, and CLI smoke checks on push and pull request.
+`gal schemas` exposes JSON Schema contracts for CLI payloads and runtime data.
 
 - Run `python -m pytest -q` in CI.
 - Run `gal verify-all examples --json` in CI.
 - Smoke registry, conversion, and loader CLI commands in CI.
+- Publish schema contracts for adapter-facing JSON payloads.
 
 ## Near-Term Deliverable
 

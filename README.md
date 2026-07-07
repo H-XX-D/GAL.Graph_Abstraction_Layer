@@ -106,6 +106,8 @@ gal load examples/dialects/hal.gal --mode replay
 gal components --json
 gal dialects
 gal dialects --json
+gal schemas
+gal schemas gal.verify_report.v0
 ```
 
 The current CLI shape is:
@@ -129,6 +131,8 @@ gal components
 gal components --kind net-op --json
 gal dialects
 gal dialects --json
+gal schemas
+gal schemas gal.verify_batch.v0
 ```
 
 `gal verify` parses, canonicalizes, checks semantic round-trip, and validates the
@@ -154,3 +158,7 @@ operation arity.
 
 GitHub Actions runs the same core checks on push and pull request: unit tests,
 `gal verify-all examples --json`, and CLI smoke commands.
+
+`gal schemas` lists the machine-readable JSON Schema contracts for the current
+CLI payloads. Pass a schema id, such as `gal.verify_report.v0`, to emit that
+schema as JSON.
