@@ -47,9 +47,9 @@ net operations, standing operations, and threads.
 
 ## Phase 3: Conversion
 
-Status: initial JSON, DOT, and YAML export support landed. Conversion routes GAL
-text through the parsed semantic AST, and JSON AST can render back to canonical
-GAL text.
+Status: initial JSON, DOT, YAML, and Cypher export support landed. Conversion
+routes GAL text through the parsed semantic AST, and JSON AST can render back to
+canonical GAL text.
 
 - Convert GAL text to JSON AST.
 - Export DOT for visualization.

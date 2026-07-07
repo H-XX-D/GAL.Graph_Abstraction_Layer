@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from gal_netlist.cli import main
-from gal_netlist.converters import to_dot, to_yaml
+from gal_netlist.converters import to_cypher, to_dot, to_yaml
 from gal_netlist.parser import parse_text
 from gal_netlist.renderer import render_document
 
@@ -42,13 +42,29 @@ def test_cli_convert_dot_and_yaml(capsys):
     assert "dialect: hal.v0" in yaml_out
     assert "nodes:" in yaml_out
 
+    assert main(["convert", str(hal_path), "--to", "cypher"]) == 0
+    cypher_out = capsys.readouterr().out
+    assert "CREATE CONSTRAINT gal_node_id" in cypher_out
+    assert "MERGE (s)-[r:ATTACHED_TO]->(t)" in cypher_out
 
-def test_all_examples_convert_to_dot_and_yaml():
+
+def test_all_examples_convert_to_dot_yaml_and_cypher():
     paths = sorted([ROOT / "examples" / "minimal.mal.gal", *(ROOT / "examples" / "dialects").glob("*.gal")])
     for path in paths:
         document = parse_text(path.read_text(encoding="utf-8"))
         assert to_dot(document).startswith("digraph G {\n"), path
         assert "schema: gal.netlist.ast.v0\n" in to_yaml(document), path
+        assert to_cypher(document).startswith("CREATE CONSTRAINT gal_node_id"), path
+
+
+def test_cypher_conversion_includes_graph_runtime_forms():
+    document = parse_text((ROOT / "examples" / "minimal.mal.gal").read_text(encoding="utf-8"))
+    cypher = to_cypher(document)
+    assert "MERGE (n:GalNode {id: 'claim_ab12'})" in cypher
+    assert "MATCH (s:GalNode {id: 'claim_ab12'}), (t:GalNode {id: 'service_api'}) MERGE (s)-[r:CONCERNS]->(t)" in cypher
+    assert "MERGE (n:GalNet {id: 'net:alert'})" in cypher
+    assert "MERGE (s:GalSchedule {id: 'schedule:watch0'})" in cypher
+    assert "MERGE (s:GalSet {id: 'set:watch0:delta'})" in cypher
 
 
 def test_cli_convert_json_ast_back_to_gal(tmp_path, capsys):

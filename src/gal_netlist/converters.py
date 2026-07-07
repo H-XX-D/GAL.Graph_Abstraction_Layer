@@ -77,6 +77,92 @@ def to_yaml(value: Any) -> str:
     return _yaml_value(value, 0).rstrip() + "\n"
 
 
+def to_cypher(document: dict[str, Any]) -> str:
+    """Render a parsed GAL document as Cypher import statements."""
+
+    lines = [
+        "CREATE CONSTRAINT gal_node_id IF NOT EXISTS FOR (n:GalNode) REQUIRE n.id IS UNIQUE;",
+        "CREATE CONSTRAINT gal_net_id IF NOT EXISTS FOR (n:GalNet) REQUIRE n.id IS UNIQUE;",
+        "CREATE CONSTRAINT gal_schedule_id IF NOT EXISTS FOR (n:GalSchedule) REQUIRE n.id IS UNIQUE;",
+        "CREATE CONSTRAINT gal_set_id IF NOT EXISTS FOR (n:GalSet) REQUIRE n.id IS UNIQUE;",
+    ]
+    declared_nodes: set[str] = set()
+
+    for node in document.get("nodes", []):
+        declared_nodes.add(node["id"])
+        props = {
+            "id": node["id"],
+            "label": node["label"],
+            "gal_form": "node",
+            "fields": {field["name"]: field["value"] for field in node.get("fields", [])},
+            "params": {param["key"]: param.get("values", []) for param in node.get("params", [])},
+        }
+        lines.append(f"MERGE (n:GalNode {{id: {_cypher_value(node['id'])}}}) SET n += {_cypher_map(props)};")
+
+    for edge in document.get("edges", []):
+        _ensure_cypher_node(lines, declared_nodes, edge["source"])
+        _ensure_cypher_node(lines, declared_nodes, edge["target"])
+        relation = _cypher_rel_type(edge["relation"])
+        props = {"relation": edge["relation"], "weight": edge["weight"], "direction": edge["direction"]}
+        if edge["direction"] == "fwd":
+            lines.append(
+                f"MATCH (s:GalNode {{id: {_cypher_value(edge['source'])}}}), (t:GalNode {{id: {_cypher_value(edge['target'])}}}) "
+                f"MERGE (s)-[r:{relation}]->(t) SET r += {_cypher_map(props)};"
+            )
+        else:
+            lines.append(
+                f"MATCH (s:GalNode {{id: {_cypher_value(edge['source'])}}}), (t:GalNode {{id: {_cypher_value(edge['target'])}}}) "
+                f"MERGE (t)-[r:{relation}]->(s) SET r += {_cypher_map(props)};"
+            )
+
+    for net in document.get("nets", []):
+        net_id = f"net:{net['output']}"
+        props = {"id": net_id, "output": net["output"], "op": net["op"], "inputs": net.get("inputs", []), "gal_form": "net"}
+        lines.append(f"MERGE (n:GalNet {{id: {_cypher_value(net_id)}}}) SET n += {_cypher_map(props)};")
+        for input_id in net.get("inputs", []):
+            _ensure_cypher_node(lines, declared_nodes, input_id)
+            lines.append(
+                f"MATCH (i:GalNode {{id: {_cypher_value(input_id)}}}), (n:GalNet {{id: {_cypher_value(net_id)}}}) "
+                "MERGE (i)-[:GAL_NET_INPUT]->(n);"
+            )
+        _ensure_cypher_node(lines, declared_nodes, net["output"])
+        lines.append(
+            f"MATCH (n:GalNet {{id: {_cypher_value(net_id)}}}), (o:GalNode {{id: {_cypher_value(net['output'])}}}) "
+            "MERGE (n)-[:GAL_NET_OUTPUT]->(o);"
+        )
+
+    for schedule in document.get("schedules", []):
+        schedule_id = f"schedule:{schedule['op']}"
+        props = {
+            "id": schedule_id,
+            "op": schedule["op"],
+            "base": schedule.get("base"),
+            "instance": schedule.get("instance"),
+            "thread": schedule["thread"],
+            "params": {param["key"]: param.get("values", []) for param in schedule.get("params", [])},
+            "gal_form": "schedule",
+        }
+        lines.append(f"MERGE (s:GalSchedule {{id: {_cypher_value(schedule_id)}}}) SET s += {_cypher_map(props)};")
+
+    for entry in document.get("sets", []):
+        set_id = f"set:{entry['target']}:{entry['param']}"
+        props = {
+            "id": set_id,
+            "target": entry["target"],
+            "param": entry["param"],
+            "value": entry["value"],
+            "gal_form": "set",
+        }
+        lines.append(f"MERGE (s:GalSet {{id: {_cypher_value(set_id)}}}) SET s += {_cypher_map(props)};")
+        _ensure_cypher_node(lines, declared_nodes, entry["target"])
+        lines.append(
+            f"MATCH (s:GalSet {{id: {_cypher_value(set_id)}}}), (t:GalNode {{id: {_cypher_value(entry['target'])}}}) "
+            "MERGE (s)-[:GAL_SETS]->(t);"
+        )
+
+    return "\n".join(lines) + "\n"
+
+
 def _yaml_value(value: Any, indent: int) -> str:
     prefix = " " * indent
     if isinstance(value, dict):
@@ -129,3 +215,39 @@ def _dot_quote(value: str) -> str:
 
 def _dot_id(value: str) -> str:
     return re.sub(r"[^A-Za-z0-9_]", "_", value)
+
+
+def _ensure_cypher_node(lines: list[str], declared_nodes: set[str], node_id: str) -> None:
+    if node_id in declared_nodes:
+        return
+    declared_nodes.add(node_id)
+    props = {"id": node_id, "label": node_id, "gal_form": "implicit_node"}
+    lines.append(f"MERGE (n:GalNode {{id: {_cypher_value(node_id)}}}) SET n += {_cypher_map(props)};")
+
+
+def _cypher_rel_type(value: str) -> str:
+    rel = re.sub(r"[^A-Za-z0-9_]", "_", value).upper()
+    if not rel or rel[0].isdigit():
+        return f"GAL_REL_{rel}"
+    return rel
+
+
+def _cypher_map(mapping: dict[str, Any]) -> str:
+    items = ", ".join(f"{key}: {_cypher_value(value)}" for key, value in mapping.items() if value is not None)
+    return "{" + items + "}"
+
+
+def _cypher_value(value: Any) -> str:
+    if value is None:
+        return "null"
+    if value is True:
+        return "true"
+    if value is False:
+        return "false"
+    if isinstance(value, (int, float)):
+        return str(value)
+    if isinstance(value, list):
+        return "[" + ", ".join(_cypher_value(item) for item in value) + "]"
+    if isinstance(value, dict):
+        return _cypher_map(value)
+    return "'" + str(value).replace("\\", "\\\\").replace("'", "\\'") + "'"
