@@ -151,3 +151,6 @@ runtime state for `replay`, and applies changes into an existing runtime JSON fo
 vocabularies. The registry currently covers reusable `netOps` and
 `standingOps`, including source dialects, supported threads, and known net
 operation arity.
+
+GitHub Actions runs the same core checks on push and pull request: unit tests,
+`gal verify-all examples --json`, and CLI smoke commands.
