@@ -7,6 +7,7 @@ import json
 import sys
 from pathlib import Path
 
+from .components import build_component_registry, validate_components
 from .converters import to_cypher, to_dot, to_yaml
 from .dialects import default_dialect_dirs, load_registry, validate_document
 from .loader import LOAD_MODES, load_document
@@ -33,6 +34,11 @@ def main(argv: list[str] | None = None) -> int:
     dialects_cmd = subparsers.add_parser("dialects", help="list available dialect specs")
     dialects_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
 
+    components_cmd = subparsers.add_parser("components", help="list registered net and standing operation components")
+    components_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
+    components_cmd.add_argument("--kind", choices=["all", "net-op", "standing-op"], default="all")
+    components_cmd.add_argument("--json", action="store_true", help="emit JSON component registry")
+
     convert_cmd = subparsers.add_parser("convert", help="convert GAL to another representation")
     convert_cmd.add_argument("path", type=Path)
     convert_cmd.add_argument("--from", dest="from_format", choices=["gal", "json"], default="gal")
@@ -50,6 +56,26 @@ def main(argv: list[str] | None = None) -> int:
         registry = load_registry(args.dialect_dir or default_dialect_dirs(Path.cwd()))
         for dialect_id in registry.ids():
             print(dialect_id)
+        return 0
+
+    if args.command == "components":
+        registry = load_registry(args.dialect_dir or default_dialect_dirs(Path.cwd()))
+        components = build_component_registry(registry)
+        if args.json:
+            payload = components.to_dict()
+            if args.kind == "net-op":
+                payload["standingOps"] = {}
+            elif args.kind == "standing-op":
+                payload["netOps"] = {}
+            print(json.dumps(payload, indent=2, sort_keys=True))
+            return 0
+        if args.kind in {"all", "net-op"}:
+            for name, component in sorted(components.net_ops.items()):
+                print(f"net_op {name} arity={component.arity} sources={','.join(sorted(component.sources))}")
+        if args.kind in {"all", "standing-op"}:
+            for name, component in sorted(components.standing_ops.items()):
+                threads = ",".join(sorted(component.threads_for(None)))
+                print(f"standing_op {name} threads={threads} sources={','.join(sorted(component.sources))}")
         return 0
 
     text = args.path.read_text(encoding="utf-8")
@@ -84,6 +110,7 @@ def main(argv: list[str] | None = None) -> int:
         if not args.no_dialect:
             registry = load_registry(args.dialect_dir or default_dialect_dirs(args.path))
             validation_issues = validate_document(document, registry)
+            validation_issues.extend(validate_components(document, build_component_registry(registry)))
             if validation_issues:
                 print(
                     json.dumps({"ok": False, "validation": [issue.to_dict() for issue in validation_issues]}, indent=2),
@@ -112,7 +139,14 @@ def main(argv: list[str] | None = None) -> int:
         if args.runtime_json is not None:
             runtime = json.loads(args.runtime_json.read_text(encoding="utf-8"))
         registry = None if args.no_dialect else load_registry(args.dialect_dir or default_dialect_dirs(args.path))
-        report = load_document(_semantic_document(document), mode=args.mode, registry=registry, runtime=runtime)
+        component_registry = None if registry is None else build_component_registry(registry)
+        report = load_document(
+            _semantic_document(document),
+            mode=args.mode,
+            registry=registry,
+            component_registry=component_registry,
+            runtime=runtime,
+        )
         print(json.dumps(report, indent=2, sort_keys=True))
         return 0 if report["ok"] else 1
 

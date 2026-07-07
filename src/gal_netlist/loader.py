@@ -5,6 +5,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
+from .components import ComponentRegistry, validate_components
 from .dialects import DialectRegistry, validate_document
 
 
@@ -17,6 +18,7 @@ def load_document(
     *,
     mode: str,
     registry: DialectRegistry | None = None,
+    component_registry: ComponentRegistry | None = None,
     runtime: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Load or inspect a GAL document against an in-memory runtime state."""
@@ -38,6 +40,8 @@ def load_document(
 
     if registry is not None:
         report["rejections"].extend(issue.to_dict() for issue in validate_document(document, registry))
+    if component_registry is not None:
+        report["rejections"].extend(issue.to_dict() for issue in validate_components(document, component_registry))
 
     report["unsupported"].extend(_unsupported_entries(document))
 

@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from gal_netlist.cli import main
+from gal_netlist.components import build_component_registry
 from gal_netlist.dialects import load_registry
 from gal_netlist.loader import load_document
 from gal_netlist.parser import parse_text
@@ -59,6 +60,18 @@ def test_loader_reports_dialect_rejections():
     report = load_document(document, mode="plan", registry=_registry())
     assert report["ok"] is False
     assert report["rejections"][0]["code"] == "unknown_node_kind"
+
+
+def test_loader_reports_component_rejections():
+    document = parse_text("@gal netlist.v0\n@dialect mal.v0\nnet bad and2 only_one\n")
+    report = load_document(
+        document,
+        mode="plan",
+        registry=_registry(),
+        component_registry=build_component_registry(_registry()),
+    )
+    assert report["ok"] is False
+    assert report["rejections"][0]["code"] == "wrong_arity"
 
 
 def test_cli_load_plan_outputs_json(capsys):

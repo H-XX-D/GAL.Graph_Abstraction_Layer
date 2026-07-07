@@ -101,6 +101,7 @@ gal convert examples/dialects/hal.gal --to cypher
 gal convert ast.json --from json --to gal
 gal load examples/dialects/hal.gal --mode plan
 gal load examples/dialects/hal.gal --mode replay
+gal components --json
 gal dialects
 ```
 
@@ -119,15 +120,24 @@ gal load graph.gal --mode verify
 gal load graph.gal --mode plan
 gal load graph.gal --mode replay
 gal load graph.gal --mode merge --runtime-json runtime.json
+gal components
+gal components --kind net-op --json
 gal dialects
 ```
 
 `gal verify` parses, canonicalizes, checks semantic round-trip, and validates the
 declared `@dialect` against vocabulary blocks loaded from `docs/dialects/*.md`.
-Use `--no-dialect` to run only syntax and round-trip verification, or
-`--dialect-dir <path>` to point at another dialect spec directory.
+It also checks registered component metadata for reusable net and standing
+operations, including core net operation arity. Use `--no-dialect` to run only
+syntax and round-trip verification, or `--dialect-dir <path>` to point at
+another dialect spec directory.
 
 `gal load` is currently an in-memory loader contract. It reports intended
 changes for `plan`, checks runtime agreement for `verify`, builds a fresh
 runtime state for `replay`, and applies changes into an existing runtime JSON for
 `merge`.
+
+`gal components` builds a small component registry from the loaded dialect
+vocabularies. The registry currently covers reusable `netOps` and
+`standingOps`, including source dialects, supported threads, and known net
+operation arity.

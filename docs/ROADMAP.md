@@ -59,14 +59,18 @@ canonical GAL text.
 
 ## Phase 4: Runtime Integration
 
-Status: initial in-memory loader contract landed. `gal load` supports `verify`,
-`plan`, `replay`, and `merge` modes and returns structured JSON reports before
-any external runtime adapter is introduced.
+Status: initial in-memory loader contract and component registry landed.
+`gal load` supports `verify`, `plan`, `replay`, and `merge` modes and returns
+structured JSON reports before any external runtime adapter is introduced.
+`gal components` exports reusable net-operation and standing-operation metadata
+derived from the loaded dialect vocabularies.
 
 - Define loader modes: `verify`, `plan`, `merge`, and `replay`.
 - Add loader reporting for admitted nodes, attached edges, created nets,
   scheduled operations, parameter sets, and rejections.
 - Define a component registry for net operations and standing operations.
+- Validate component arity and supported standing-operation threads during
+  verify and load.
 
 ## Near-Term Deliverable
 
