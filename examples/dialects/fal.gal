@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect fal.v0
+
+failure_db_lag "Database replica lag failure" severity(0.72) likelihood(0.22) [kind: failure]
+mitigation_read_primary "Read from primary mitigation" coverage(0.75) [kind: mitigation]
+impacts> blast_checkout(0.8)
+mitigated_by> mitigation_read_primary(0.7)
+net resilient and2 mitigated recoverable
+addf verify_recovery0 failure [failure: failure_db_lag] [mode: tabletop]

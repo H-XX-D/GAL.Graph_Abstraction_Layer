@@ -520,6 +520,21 @@ runtime domain.
 | `aal.v0` | Agent Abstraction Layer | agents, tools, tasks, handoffs |
 | `wal.v0` | Workflow Abstraction Layer | steps, jobs, gates, retries |
 | `oal.v0` | Observability Abstraction Layer | signals, alerts, traces, monitors |
+| `ral.v0` | Resource Abstraction Layer | compute, storage, network, quota |
+| `sal.v0` | State Abstraction Layer | state, snapshots, migrations, consistency |
+| `eal.v0` | Event Abstraction Layer | events, streams, triggers, replay |
+| `cal.v0` | Capability Abstraction Layer | permissions, tools, grants, negotiation |
+| `ial.v0` | Interface Abstraction Layer | APIs, contracts, schemas, protocols |
+| `tal.v0` | Topology Abstraction Layer | regions, clusters, routes, placement |
+| `qal.v0` | Quality Abstraction Layer | SLOs, guarantees, constraints, correctness |
+| `fal.v0` | Failure Abstraction Layer | failures, blast radius, recovery paths |
+| `kal.v0` | Knowledge Abstraction Layer | concepts, sources, provenance |
+| `real.v0` | Reasoning Abstraction Layer | hypotheses, plans, critiques, decisions |
+| `lal.v0` | Learning Abstraction Layer | examples, feedback, evaluations, preference updates |
+| `goval.v0` | Governance Abstraction Layer | ownership, authority, lifecycle, escalation |
+| `riskal.v0` | Risk Abstraction Layer | risks, controls, mitigations, acceptance |
+| `audal.v0` | Audit Abstraction Layer | evidence, attestations, receipts, trails |
+| `val.v0` | Verification Abstraction Layer | tests, checks, proofs, acceptance criteria |
 
 Detailed draft specs live under `docs/dialects/`.
 

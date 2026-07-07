@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect eal.v0
+
+topic_orders "Orders topic" rate(240) lag(0.03) [kind: topic]
+sub_billing "Billing subscription" lag(12) [kind: subscription]
+subscribes_to> topic_orders(1.0)
+handled_by> handler_billing(1.0)
+net consumer_ok and2 received caught_up
+addf consume0 event [subscription: sub_billing] [batch: 100]

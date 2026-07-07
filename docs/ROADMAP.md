@@ -12,6 +12,9 @@ format and implementation surface.
 - Define the first dialect schema for `mal.v0`.
 - Draft the initial dialect schemas for `dal.v0`, `pal.v0`, `aal.v0`,
   `wal.v0`, and `oal.v0`.
+- Expand the dialect family with resource, state, event, capability, interface,
+  topology, quality, failure, knowledge, reasoning, learning, governance, risk,
+  audit, and verification dialects.
 - Add fixtures that exercise every line form.
 
 ## Phase 1: Parser And Renderer

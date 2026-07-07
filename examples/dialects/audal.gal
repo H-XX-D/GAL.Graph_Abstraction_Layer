@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect audal.v0
+
+receipt_pages_deploy "GitHub Pages deploy receipt" integrity(0.96) currency(0.98) [kind: receipt]
+attestation_public_docs "Public docs deployed attestation" confidence(0.92) [kind: attestation]
+evidences> receipt_pages_deploy(1.0)
+covers> attestation_public_docs(0.8)
+net audit_ready and2 complete signed
+addf verify_integrity0 audit [receipt: receipt_pages_deploy]

@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect ral.v0
+
+pool_compute_us "US compute pool" capacity(1000) used(640) [kind: pool]
+allocation_api "API compute allocation" used(120) [kind: allocation]
+reserved_for> svc_api(1.0)
+consumes> pool_compute_us(0.12)
+net resource_ok and2 available not_over_quota
+addf forecast0 capacity [pool: pool_compute_us] [window: 7d]
