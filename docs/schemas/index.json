@@ -12,6 +12,11 @@
       "title": "GAL dialect registry"
     },
     {
+      "description": "Diagnostic report emitted by gal doctor --json.",
+      "id": "gal.doctor.v0",
+      "title": "GAL doctor report"
+    },
+    {
       "description": "Semantic AST emitted by gal parse --json and gal convert --to json.",
       "id": "gal.netlist.ast.v0",
       "title": "GAL netlist AST"

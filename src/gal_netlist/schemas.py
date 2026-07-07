@@ -172,6 +172,62 @@ DIALECT_REGISTRY_SCHEMA = {
     "additionalProperties": False,
 }
 
+DOCTOR_SCHEMA = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "gal.doctor.v0",
+    "title": "GAL doctor report",
+    "description": "Diagnostic report emitted by gal doctor --json.",
+    "type": "object",
+    "required": [
+        "schema",
+        "ok",
+        "version",
+        "python",
+        "cwd",
+        "dialectDirs",
+        "dialectCount",
+        "dialects",
+        "schemaCount",
+        "schemas",
+        "docsSchemas",
+        "checks",
+    ],
+    "properties": {
+        "schema": {"const": "gal.doctor.v0"},
+        "ok": {"type": "boolean"},
+        "version": {"type": "string"},
+        "python": {"type": "string"},
+        "cwd": {"type": "string"},
+        "dialectDirs": {"type": "array", "items": {"type": "string"}},
+        "dialectCount": {"type": "integer", "minimum": 0},
+        "dialects": {"type": "array", "items": {"type": "string"}},
+        "schemaCount": {"type": "integer", "minimum": 0},
+        "schemas": {"type": "array", "items": {"type": "string"}},
+        "docsSchemas": {
+            "type": "object",
+            "required": ["path", "index", "files", "complete"],
+            "properties": {
+                "path": {"type": ["string", "null"]},
+                "index": {"type": "boolean"},
+                "files": {"type": "object", "additionalProperties": {"type": "boolean"}},
+                "complete": {"type": "boolean"},
+            },
+            "additionalProperties": False,
+        },
+        "checks": {
+            "type": "object",
+            "required": ["dialectsLoaded", "schemasRegistered", "docsSchemasComplete"],
+            "properties": {
+                "dialectsLoaded": {"type": "boolean"},
+                "schemasRegistered": {"type": "boolean"},
+                "docsSchemasComplete": {"type": "boolean"},
+            },
+            "additionalProperties": False,
+        },
+    },
+    "additionalProperties": False,
+}
+
 COMPONENT_SCHEMA = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "gal.components.v0",
@@ -263,6 +319,7 @@ AST_SCHEMA = {
 SCHEMAS = {
     "gal.components.v0": COMPONENT_SCHEMA,
     "gal.dialects.v0": DIALECT_REGISTRY_SCHEMA,
+    "gal.doctor.v0": DOCTOR_SCHEMA,
     "gal.netlist.ast.v0": AST_SCHEMA,
     "gal.runtime.v0": RUNTIME_SCHEMA,
     "gal.verify_batch.v0": VERIFY_BATCH_SCHEMA,

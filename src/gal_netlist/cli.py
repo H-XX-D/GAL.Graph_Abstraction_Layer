@@ -14,7 +14,7 @@ from .dialects import default_dialect_dirs, load_registry, validate_document
 from .loader import LOAD_MODES, load_document
 from .parser import parse_text
 from .renderer import render_document
-from .schemas import get_schema, schema_ids, schema_index, write_schemas
+from .schemas import get_schema, schema_filename, schema_ids, schema_index, write_schemas
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -54,6 +54,10 @@ def main(argv: list[str] | None = None) -> int:
     schemas_cmd.add_argument("schema_id", nargs="?", help="schema id to emit")
     schemas_cmd.add_argument("--json", action="store_true", help="emit JSON schema index")
     schemas_cmd.add_argument("--write-dir", type=Path, help="write schema JSON files into a directory")
+
+    doctor_cmd = subparsers.add_parser("doctor", help="report GAL CLI diagnostics")
+    doctor_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
+    doctor_cmd.add_argument("--json", action="store_true", help="emit JSON diagnostic report")
 
     convert_cmd = subparsers.add_parser("convert", help="convert GAL to another representation")
     convert_cmd.add_argument("path", type=Path)
@@ -118,6 +122,19 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         for schema_id in schema_ids():
             print(schema_id)
+        return 0
+
+    if args.command == "doctor":
+        report = _doctor_report(args.dialect_dir or default_dialect_dirs(Path.cwd()))
+        if args.json:
+            print(json.dumps(report, indent=2, sort_keys=True))
+        else:
+            print(f"version: {report['version']}")
+            print(f"python: {report['python']}")
+            print(f"cwd: {report['cwd']}")
+            print(f"dialects: {report['dialectCount']}")
+            print(f"schemas: {report['schemaCount']}")
+            print(f"docs schemas complete: {'yes' if report['docsSchemas']['complete'] else 'no'}")
         return 0
 
     if args.command == "verify-all":
@@ -352,6 +369,51 @@ def _batch_report(reports: list[dict]) -> dict:
         "failed": len(failed),
         "reports": reports,
     }
+
+
+def _doctor_report(dialect_dirs: list[Path]) -> dict:
+    registry = load_registry(dialect_dirs)
+    docs_schemas_dir = _find_docs_schemas_dir()
+    files = {schema_filename(schema_id): False for schema_id in schema_ids()}
+    index_exists = False
+    if docs_schemas_dir is not None:
+        index_exists = (docs_schemas_dir / "index.json").exists()
+        files = {filename: (docs_schemas_dir / filename).exists() for filename in files}
+    docs_complete = index_exists and all(files.values())
+    dialect_ids = registry.ids()
+    schema_id_list = schema_ids()
+
+    return {
+        "schema": "gal.doctor.v0",
+        "ok": True,
+        "version": __version__,
+        "python": sys.version.split()[0],
+        "cwd": str(Path.cwd()),
+        "dialectDirs": [str(path) for path in dialect_dirs],
+        "dialectCount": len(dialect_ids),
+        "dialects": dialect_ids,
+        "schemaCount": len(schema_id_list),
+        "schemas": schema_id_list,
+        "docsSchemas": {
+            "path": str(docs_schemas_dir) if docs_schemas_dir is not None else None,
+            "index": index_exists,
+            "files": files,
+            "complete": docs_complete,
+        },
+        "checks": {
+            "dialectsLoaded": bool(dialect_ids),
+            "schemasRegistered": bool(schema_id_list),
+            "docsSchemasComplete": docs_complete,
+        },
+    }
+
+
+def _find_docs_schemas_dir() -> Path | None:
+    for root in [Path.cwd(), *Path.cwd().parents]:
+        candidate = root / "docs" / "schemas"
+        if candidate.exists():
+            return candidate
+    return None
 
 
 def _summary(document: dict) -> dict[str, int]:

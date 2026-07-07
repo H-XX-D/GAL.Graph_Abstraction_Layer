@@ -33,6 +33,7 @@ jobs:
       - name: Smoke CLI outputs
         run: |
           gal --version
+          gal doctor --json >/dev/null
           gal dialects --json >/dev/null
           gal components --json >/dev/null
           gal schemas --json >/dev/null

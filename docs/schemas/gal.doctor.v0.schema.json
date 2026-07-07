@@ -1,0 +1,115 @@
+{
+  "$id": "gal.doctor.v0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Diagnostic report emitted by gal doctor --json.",
+  "properties": {
+    "checks": {
+      "additionalProperties": false,
+      "properties": {
+        "dialectsLoaded": {
+          "type": "boolean"
+        },
+        "docsSchemasComplete": {
+          "type": "boolean"
+        },
+        "schemasRegistered": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "dialectsLoaded",
+        "schemasRegistered",
+        "docsSchemasComplete"
+      ],
+      "type": "object"
+    },
+    "cwd": {
+      "type": "string"
+    },
+    "dialectCount": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "dialectDirs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "dialects": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "docsSchemas": {
+      "additionalProperties": false,
+      "properties": {
+        "complete": {
+          "type": "boolean"
+        },
+        "files": {
+          "additionalProperties": {
+            "type": "boolean"
+          },
+          "type": "object"
+        },
+        "index": {
+          "type": "boolean"
+        },
+        "path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "path",
+        "index",
+        "files",
+        "complete"
+      ],
+      "type": "object"
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "python": {
+      "type": "string"
+    },
+    "schema": {
+      "const": "gal.doctor.v0"
+    },
+    "schemaCount": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "schemas": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "version": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema",
+    "ok",
+    "version",
+    "python",
+    "cwd",
+    "dialectDirs",
+    "dialectCount",
+    "dialects",
+    "schemaCount",
+    "schemas",
+    "docsSchemas",
+    "checks"
+  ],
+  "title": "GAL doctor report",
+  "type": "object"
+}

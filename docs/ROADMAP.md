@@ -82,6 +82,7 @@ fixture verification, and CLI smoke checks on push and pull request.
 `gal schemas` exposes JSON Schema contracts for CLI payloads and runtime data.
 Static schema files are published under `docs/schemas/`.
 `gal --version` reports the installed CLI version for diagnostics.
+`gal doctor` reports version, runtime, dialect, schema, and docs-schema health.
 
 - Run `python -m pytest -q` in CI.
 - Run `gal verify-all examples --json` in CI.
@@ -90,6 +91,7 @@ Static schema files are published under `docs/schemas/`.
 - Validate representative CLI payloads against the published JSON Schemas.
 - Keep checked-in static schema files synchronized with the in-code registry.
 - Expose the package version through the CLI and Python package.
+- Add a doctor command for local and adapter diagnostics.
 
 ## Near-Term Deliverable
 
