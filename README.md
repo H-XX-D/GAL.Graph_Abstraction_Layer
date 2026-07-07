@@ -93,6 +93,7 @@ Run the current checks:
 
 ```bash
 python3 -m pytest -q
+gal --version
 gal verify examples/minimal.mal.gal
 gal verify examples/minimal.mal.gal --json
 gal verify-all examples --json
@@ -115,6 +116,7 @@ gal schemas --write-dir docs/schemas
 The current CLI shape is:
 
 ```bash
+gal --version
 gal parse graph.gal --json
 gal format graph.gal
 gal verify graph.gal

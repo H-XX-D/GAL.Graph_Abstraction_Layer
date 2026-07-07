@@ -7,6 +7,7 @@ import json
 import sys
 from pathlib import Path
 
+from ._version import __version__
 from .components import build_component_registry, validate_components
 from .converters import to_cypher, to_dot, to_yaml
 from .dialects import default_dialect_dirs, load_registry, validate_document
@@ -18,6 +19,7 @@ from .schemas import get_schema, schema_ids, schema_index, write_schemas
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="gal")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     parse_cmd = subparsers.add_parser("parse", help="parse GAL text")

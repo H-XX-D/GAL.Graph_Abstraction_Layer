@@ -1,5 +1,6 @@
 """GAL:netlist parser and renderer."""
 
+from ._version import __version__, package_version
 from .components import ComponentRegistry, build_component_registry, validate_components
 from .converters import to_cypher, to_dot, to_yaml
 from .parser import GalParseError, parse_text
@@ -14,11 +15,13 @@ __all__ = [
     "LOAD_MODES",
     "ComponentRegistry",
     "ValidationIssue",
+    "__version__",
     "build_component_registry",
     "get_schema",
     "load_document",
     "load_registry",
     "parse_text",
+    "package_version",
     "render_document",
     "schema_filename",
     "schema_ids",
