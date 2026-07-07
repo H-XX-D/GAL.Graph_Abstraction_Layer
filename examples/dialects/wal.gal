@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect wal.v0
+
+workflow_release "Release workflow" progress(0.20) [kind: workflow]
+job_build "Build artifact" status(0.70) attempts(1) [kind: job]
+job_verify "Verify release" status(0.25) [kind: job]
+job_build precedes> job_verify(1.0)
+net should_retry and2 failed retryable
+addf dispatch0 queue [workflow: workflow_release] [job: job_build]

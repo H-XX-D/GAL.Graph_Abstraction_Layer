@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GAL Graph Abstraction Layer</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="page-header">
+      <p class="kicker">Draft v0.1</p>
+      <h1>GAL Graph Abstraction Layer</h1>
+      <p class="lede">
+        A small, inspectable interchange layer for graph-runtime state: nodes,
+        edges, signal wiring, standing operations, and parameter changes.
+      </p>
+      <nav aria-label="Primary">
+        <a href="https://github.com/hendrixx-cnc/GAL.Graph_Abstraction_Layer/blob/main/GAL_NETLIST_SPEC.md">Specification</a>
+        <a href="ROADMAP.md">Roadmap</a>
+        <a href="GLOSSARY.md">Glossary</a>
+        <a href="dialects/">Dialects</a>
+        <a href="https://github.com/hendrixx-cnc/GAL.Graph_Abstraction_Layer/blob/main/examples/minimal.mal.gal">Example</a>
+      </nav>
+    </header>
+
+    <main>
+      <section>
+        <h2>Core Contract</h2>
+        <p>
+          GAL text is designed to round-trip through a canonical AST while
+          preserving graph-runtime meaning.
+        </p>
+        <pre><code>GAL text -&gt; AST -&gt; canonical GAL text -&gt; AST</code></pre>
+      </section>
+
+      <section>
+        <h2>Line Forms</h2>
+        <div class="grid">
+          <article>
+            <h3>Node</h3>
+            <code>&lt;id&gt; "label" fields...</code>
+          </article>
+          <article>
+            <h3>Edge</h3>
+            <code>&lt;relation&gt;&gt; &lt;target&gt;(weight)</code>
+          </article>
+          <article>
+            <h3>Net</h3>
+            <code>net output op input...</code>
+          </article>
+          <article>
+            <h3>Standing Operation</h3>
+            <code>addf opInstance tick [params...]</code>
+          </article>
+          <article>
+            <h3>Parameter Set</h3>
+            <code>setp target.param value</code>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <h2>Dialect Family</h2>
+        <div class="grid">
+          <article>
+            <h3>MAL</h3>
+            <p>Memory graphs: claims, evidence, contradiction, and standing memory programs.</p>
+          </article>
+          <article>
+            <h3>DAL</h3>
+            <p>Deployment graphs: services, artifacts, releases, rollout gates, and rollback paths.</p>
+          </article>
+          <article>
+            <h3>PAL</h3>
+            <p>Policy graphs: rules, obligations, approvals, decisions, and exceptions.</p>
+          </article>
+          <article>
+            <h3>AAL</h3>
+            <p>Agent graphs: agents, tools, tasks, plans, handoffs, and receipts.</p>
+          </article>
+          <article>
+            <h3>WAL</h3>
+            <p>Workflow graphs: jobs, steps, gates, triggers, retries, and artifacts.</p>
+          </article>
+          <article>
+            <h3>OAL</h3>
+            <p>Observability graphs: metrics, logs, traces, monitors, alerts, and incidents.</p>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <h2>Minimal Example</h2>
+        <pre><code>@gal netlist.v0
+@dialect mal.v0
+
+claim_ab12 "API is degraded" conf(0.82) [kind: claim]
+concerns&gt; service_api(0.9)
+net alert or2 high_concern stale
+addf watch0 tick [topics: api-status] [delta: 0.20]
+setp watch0.delta 0.25</code></pre>
+      </section>
+
+      <section>
+        <h2>Next Milestone</h2>
+        <p>
+          The next release target is a parser and canonical renderer with
+          semantic round-trip tests for every line form.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

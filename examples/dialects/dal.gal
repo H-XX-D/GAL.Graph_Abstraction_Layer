@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect dal.v0
+
+svc_api "Public API service" health(0.94) [kind: service]
+release_api_20260706 "API release 2026.07.06" progress(0.25) risk(0.31) [kind: release]
+deploys_to> env_prod(1.0)
+guarded_by> gate_error_budget(1.0)
+net deploy_ok and2 healthy policy_ok
+addf rollout0 deploy [release: release_api_20260706] [strategy: canary] [percent: 10]
