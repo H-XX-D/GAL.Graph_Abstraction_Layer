@@ -86,6 +86,7 @@ Static schema files are published under `docs/schemas/`.
 `gal doctor` reports version, runtime, dialect, schema, and docs-schema health.
 `gal init` creates starter GAL files from the registered dialect vocabulary and
 can emit structured JSON reports.
+`gal examples` exposes package-bundled examples for installed CLI users.
 
 - Run `python -m pytest -q` in CI.
 - Build the source distribution and wheel in CI.
@@ -98,6 +99,7 @@ can emit structured JSON reports.
 - Expose the package version through the CLI and Python package.
 - Add a doctor command for local and adapter diagnostics.
 - Add a starter-file generator for registered dialects.
+- Bundle examples and expose them through the CLI.
 
 ## Near-Term Deliverable
 

@@ -1,0 +1,10 @@
+@gal netlist.v0
+@dialect hal.v0
+
+device_gpu0 "GPU device 0" health(0.94) temperature(68) [kind: device]
+driver_gpu "GPU driver" revision(535) health(0.91) [kind: driver]
+bus_pcie0 "PCIe bus 0" capacity(0.80) latency(0.03) [kind: bus]
+device_gpu0 attached_to> bus_pcie0(1.0)
+device_gpu0 driven_by> driver_gpu(1.0)
+net device_ready and2 present compatible
+addf probe0 hardware [device: device_gpu0] [interval: 30s]

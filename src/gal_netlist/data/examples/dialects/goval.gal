@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect goval.v0
+
+owner_platform "Platform owner" authority(0.92) currency(0.95) [kind: owner]
+review_dialect_set "Dialect set review" status(0.40) priority(0.75) [kind: review]
+owns> charter_gal(1.0)
+reviews> review_dialect_set(0.9)
+net governance_ok and2 owned reviewed
+addf check_ownership0 governance [target: charter_gal] [cadence: monthly]

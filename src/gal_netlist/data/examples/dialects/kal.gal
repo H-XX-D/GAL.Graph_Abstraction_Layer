@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect kal.v0
+
+concept_gal "Graph Abstraction Layer" confidence(0.92) currency(0.95) [kind: concept]
+definition_gal "GAL defines graph-runtime interchange" confidence(0.88) [kind: definition]
+defines> concept_gal(1.0)
+cites> source_spec(1.0)
+net knowledge_ok and2 supported canonical
+addf reconcile0 knowledge [concept: concept_gal] [scope: dialects]

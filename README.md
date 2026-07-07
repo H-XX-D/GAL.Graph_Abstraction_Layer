@@ -96,6 +96,10 @@ python3 -m pytest -q
 python3 -m build
 gal --version
 gal doctor --json
+gal examples
+gal examples --json
+gal examples --name minimal.mal.gal
+gal examples --write-dir /tmp/gal-examples
 gal init starter.mal.gal
 gal init starter.hal.gal --dialect hal.v0 --json
 gal verify examples/minimal.mal.gal
@@ -122,6 +126,9 @@ The current CLI shape is:
 ```bash
 gal --version
 gal doctor
+gal examples
+gal examples --name minimal.mal.gal
+gal examples --write-dir ./gal-examples
 gal init graph.gal
 gal init graph.gal --dialect hal.v0 --force
 gal init graph.gal --json
@@ -163,6 +170,10 @@ files, and returns a batch report.
 `mal.v0`, refuses to overwrite existing files unless `--force` is supplied, and
 can create missing parent directories with `--parents`. Use `--json` to emit a
 structured `gal.init_report.v0` report for scripts and adapters.
+
+`gal examples` lists bundled example files that ship inside the package. Use
+`--json` to emit a structured `gal.examples.v0` registry, `--name <example>` to
+print one example, or `--write-dir <path>` to copy examples into a workspace.
 
 `gal load` is currently an in-memory loader contract. It reports intended
 changes for `plan`, checks runtime agreement for `verify`, builds a fresh

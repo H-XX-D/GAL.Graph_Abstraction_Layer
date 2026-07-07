@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect val.v0
+
+suite_roundtrip "GAL round-trip suite" coverage(0.82) status(0.90) [kind: suite]
+test_parse_render "Parse/render semantic equivalence test" confidence(0.88) [kind: test]
+covers> criterion_semantic_equiv(1.0)
+passes> test_parse_render(1.0)
+net gate_ok and2 passed covered
+addf run_suite0 ci [suite: suite_roundtrip] [trigger: push]

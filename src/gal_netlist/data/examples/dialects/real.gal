@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect real.v0
+
+hyp_parser_first "Build parser before loaders" confidence(0.78) utility(0.82) [kind: hypothesis]
+decision_next "Choose parser and renderer next" confidence(0.84) [kind: decision]
+supports> hyp_parser_first(0.9)
+chooses> option_parser(1.0)
+net decision_ready and2 plausible coherent
+addf compare0 reason [options: option_parser option_loader] [criterion: utility]

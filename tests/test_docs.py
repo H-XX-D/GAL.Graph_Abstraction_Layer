@@ -27,3 +27,14 @@ def test_bundled_dialect_specs_match_docs_source():
     assert [path.name for path in source_paths] == sorted(child.name for child in bundled.iterdir() if child.name.endswith(".md"))
     for source_path in source_paths:
         assert bundled.joinpath(source_path.name).read_text(encoding="utf-8") == source_path.read_text(encoding="utf-8")
+
+
+def test_bundled_examples_match_source_examples():
+    source_paths = sorted(path for path in (ROOT / "examples").rglob("*.gal") if path.is_file())
+
+    for source_path in source_paths:
+        relative = source_path.relative_to(ROOT / "examples")
+        assert (
+            files("gal_netlist").joinpath("data", "examples", *relative.parts).read_text(encoding="utf-8")
+            == source_path.read_text(encoding="utf-8")
+        )

@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect sal.v0
+
+store_orders "Orders store" consistency(0.92) durability(0.99) [kind: store]
+migration_orders_v4 "Orders schema migration v4" risk(0.28) [kind: migration]
+migrates_to> schema_orders_v3(1.0)
+stored_in> store_orders(1.0)
+net migration_ready and2 consistent snapshotted
+addf snapshot0 state [store: store_orders] [retention: 14d]

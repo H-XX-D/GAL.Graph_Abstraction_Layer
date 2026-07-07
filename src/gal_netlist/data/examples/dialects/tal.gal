@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect tal.v0
+
+region_use1 "us-east-1" health(0.96) capacity(0.78) [kind: region]
+route_api_edge "API edge route" latency(0.08) health(0.94) [kind: route]
+placed_in> region_use1(1.0)
+routes_to> cluster_api_a(1.0)
+net path_ok and2 reachable redundant
+addf probe_link0 topology [route: route_api_edge] [interval: 30s]

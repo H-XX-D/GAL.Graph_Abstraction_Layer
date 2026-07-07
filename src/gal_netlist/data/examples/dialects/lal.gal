@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect lal.v0
+
+eval_parser_roundtrip "Parser round-trip evaluation" score(0.91) coverage(0.86) [kind: evaluation]
+lesson_ast_first "Keep AST as converter boundary" confidence(0.90) [kind: lesson]
+evaluates> metric_semantic_equiv(1.0)
+derived_from> eval_parser_roundtrip(0.8)
+net promote_lesson and2 validated stable
+addf calibrate0 eval [metric: metric_semantic_equiv] [window: 30d]

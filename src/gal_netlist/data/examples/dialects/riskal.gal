@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect riskal.v0
+
+risk_unreviewed_deploy "Unreviewed production deploy risk" likelihood(0.22) impact(0.72) [kind: risk]
+control_release_review "Release review control" coverage(0.84) [kind: control]
+mitigated_by> control_release_review(0.8)
+threatens> asset_prod(0.7)
+net risk_ok and2 mitigated controlled
+addf score_risk0 risk [risk: risk_unreviewed_deploy] [method: likelihood_impact]

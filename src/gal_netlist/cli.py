@@ -11,6 +11,7 @@ from ._version import __version__
 from .components import build_component_registry, validate_components
 from .converters import to_cypher, to_dot, to_yaml
 from .dialects import default_dialect_dirs, load_registry, validate_document
+from .examples import bundled_examples, example_registry, find_example, write_examples
 from .loader import LOAD_MODES, load_document
 from .parser import parse_text
 from .renderer import render_document
@@ -57,6 +58,12 @@ def main(argv: list[str] | None = None) -> int:
     components_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
     components_cmd.add_argument("--kind", choices=["all", "net-op", "standing-op"], default="all")
     components_cmd.add_argument("--json", action="store_true", help="emit JSON component registry")
+
+    examples_cmd = subparsers.add_parser("examples", help="list or emit bundled GAL examples")
+    examples_cmd.add_argument("--name", help="example name to print or write")
+    examples_cmd.add_argument("--write-dir", type=Path, help="write bundled examples into a directory")
+    examples_cmd.add_argument("--force", action="store_true", help="overwrite existing files when writing examples")
+    examples_cmd.add_argument("--json", action="store_true", help="emit JSON example registry")
 
     schemas_cmd = subparsers.add_parser("schemas", help="list or emit JSON Schema contracts")
     schemas_cmd.add_argument("schema_id", nargs="?", help="schema id to emit")
@@ -107,6 +114,39 @@ def main(argv: list[str] | None = None) -> int:
             for name, component in sorted(components.standing_ops.items()):
                 threads = ",".join(sorted(component.threads_for(None)))
                 print(f"standing_op {name} threads={threads} sources={','.join(sorted(component.sources))}")
+        return 0
+
+    if args.command == "examples":
+        selected_examples = bundled_examples()
+        if args.name:
+            selected = find_example(args.name)
+            if selected is None:
+                print(json.dumps({"ok": False, "error": "unknown_example", "name": args.name}, indent=2), file=sys.stderr)
+                return 1
+            selected_examples = [selected]
+        if args.write_dir:
+            try:
+                written = write_examples(args.write_dir, selected_examples, force=args.force)
+            except FileExistsError as exc:
+                print(json.dumps({"ok": False, "error": "file_exists", "path": str(exc)}, indent=2), file=sys.stderr)
+                return 1
+            if args.json:
+                payload = example_registry(selected_examples)
+                payload["written"] = [str(path) for path in written]
+                print(json.dumps(payload, indent=2, sort_keys=True))
+            else:
+                for path in written:
+                    print(path)
+            return 0
+        if args.json:
+            print(json.dumps(example_registry(selected_examples), indent=2, sort_keys=True))
+            return 0
+        if args.name:
+            sys.stdout.write(selected_examples[0].read_text())
+            return 0
+        for example in selected_examples:
+            suffix = f" dialect={example.dialect}" if example.dialect else ""
+            print(f"{example.name}{suffix}")
         return 0
 
     if args.command == "schemas":

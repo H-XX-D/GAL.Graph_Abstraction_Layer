@@ -258,6 +258,32 @@ INIT_REPORT_SCHEMA = {
     "additionalProperties": False,
 }
 
+EXAMPLES_SCHEMA = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "gal.examples.v0",
+    "title": "GAL bundled examples registry",
+    "description": "Registry emitted by gal examples --json.",
+    "type": "object",
+    "required": ["schema", "examples"],
+    "properties": {
+        "schema": {"const": "gal.examples.v0"},
+        "examples": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ["name", "dialect"],
+                "properties": {
+                    "name": {"type": "string"},
+                    "dialect": {"type": ["string", "null"]},
+                },
+                "additionalProperties": False,
+            },
+        },
+        "written": {"type": "array", "items": {"type": "string"}},
+    },
+    "additionalProperties": False,
+}
+
 COMPONENT_SCHEMA = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "gal.components.v0",
@@ -350,6 +376,7 @@ SCHEMAS = {
     "gal.components.v0": COMPONENT_SCHEMA,
     "gal.dialects.v0": DIALECT_REGISTRY_SCHEMA,
     "gal.doctor.v0": DOCTOR_SCHEMA,
+    "gal.examples.v0": EXAMPLES_SCHEMA,
     "gal.init_report.v0": INIT_REPORT_SCHEMA,
     "gal.netlist.ast.v0": AST_SCHEMA,
     "gal.runtime.v0": RUNTIME_SCHEMA,

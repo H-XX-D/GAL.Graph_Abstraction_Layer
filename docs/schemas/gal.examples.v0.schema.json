@@ -1,0 +1,45 @@
+{
+  "$id": "gal.examples.v0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Registry emitted by gal examples --json.",
+  "properties": {
+    "examples": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "dialect": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "dialect"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "schema": {
+      "const": "gal.examples.v0"
+    },
+    "written": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "examples"
+  ],
+  "title": "GAL bundled examples registry",
+  "type": "object"
+}

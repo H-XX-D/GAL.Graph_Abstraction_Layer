@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect pal.v0
+
+policy_deploy_windows "Production deploy windows" compliance(0.92) [kind: policy]
+rule_weekday_window "Deploy only during approved weekday windows" severity(0.70) [kind: rule]
+applies_to> scope_prod_deploy(1.0)
+requires> approval_release_manager(0.9)
+net policy_ok and2 allowed compliant
+addf evaluate0 decision [subject: agent_deploy0] [resource: env_prod] [action: deploy]

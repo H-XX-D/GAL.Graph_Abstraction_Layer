@@ -42,8 +42,11 @@ jobs:
           EOF
           cd "$tmpdir"
           "$tmpdir/venv/bin/gal" dialects --json | "$tmpdir/venv/bin/python" -c 'import json, sys; assert "mal.v0" in json.load(sys.stdin)["dialects"]'
+          "$tmpdir/venv/bin/gal" examples --json | "$tmpdir/venv/bin/python" -c 'import json, sys; assert "minimal.mal.gal" in [item["name"] for item in json.load(sys.stdin)["examples"]]'
+          "$tmpdir/venv/bin/gal" examples --name minimal.mal.gal > copied.mal.gal
           "$tmpdir/venv/bin/gal" init starter.gal --dialect mal.v0 --json
           "$tmpdir/venv/bin/gal" verify starter.gal --json
+          "$tmpdir/venv/bin/gal" verify copied.mal.gal --json
           "$tmpdir/venv/bin/gal" verify minimal.mal.gal --json
 
       - name: Verify examples
@@ -56,6 +59,8 @@ jobs:
           tmpdir="$(mktemp -d)"
           gal init "$tmpdir/starter.gal" --dialect hal.v0 --json >/dev/null
           gal verify "$tmpdir/starter.gal" --json >/dev/null
+          gal examples --json >/dev/null
+          gal examples --name minimal.mal.gal >/dev/null
           gal dialects --json >/dev/null
           gal components --json >/dev/null
           gal schemas --json >/dev/null

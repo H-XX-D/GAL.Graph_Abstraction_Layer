@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect aal.v0
+
+agent_codex "Codex coding agent" trust(0.86) [kind: agent]
+task_define_dal "Define DAL dialect" progress(0.40) priority(0.80) [kind: task]
+assigned_to> agent_codex(1.0)
+requires> tool_git(0.8)
+net can_execute and2 ready policy_ok
+addf checkpoint0 tick [task: task_define_dal] [cadence: milestone]

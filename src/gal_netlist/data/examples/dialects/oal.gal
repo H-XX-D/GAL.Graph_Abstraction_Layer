@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect oal.v0
+
+metric_api_5xx "API 5xx rate" value(0.018) threshold(0.020) freshness(0.96) [kind: metric]
+monitor_api_errors "API error monitor" confidence(0.88) noise(0.12) [kind: monitor]
+observes> metric_api_5xx(1.0)
+alerts_on> alert_api_errors(0.9)
+net should_page and2 breaching page
+addf sample0 observe [metric: metric_api_5xx] [window: 5m]

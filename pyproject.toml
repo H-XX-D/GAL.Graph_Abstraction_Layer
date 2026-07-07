@@ -21,7 +21,7 @@ dev = ["build>=1.2", "jsonschema>=4.23", "pytest>=8"]
 where = ["src"]
 
 [tool.setuptools.package-data]
-gal_netlist = ["data/dialects/*.md"]
+gal_netlist = ["data/dialects/*.md", "data/examples/*.gal", "data/examples/dialects/*.gal"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

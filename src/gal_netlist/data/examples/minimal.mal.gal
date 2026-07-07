@@ -1,0 +1,14 @@
+@gal netlist.v0
+@dialect mal.v0
+
+claim_ab12 "API is degraded" conf(0.82) eff(0.76) curr(0.91) sal(0.44) [kind: claim] [topics: api-status]
+body "Five-minute error window exceeded normal baseline."
+concerns> service_api(0.9)
+supports> log_cd34(0.8)
+
+net alert or2 high_concern stale
+net route lut5 weak stale review pinned annexed
+
+addf watch0 tick [topics: api-status] [measure: effective_confidence] [delta: 0.20]
+addf drift0 tick [topics: api-status] [measure: currency] [delta: 0.30]
+setp watch0.delta 0.25

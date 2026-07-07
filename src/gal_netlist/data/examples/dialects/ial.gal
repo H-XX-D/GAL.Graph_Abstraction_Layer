@@ -1,0 +1,9 @@
+@gal netlist.v0
+@dialect ial.v0
+
+api_orders "Orders API" stability(0.88) compatibility(0.93) [kind: interface]
+schema_order_v3 "Order schema v3" version(3) coverage(0.91) [kind: schema]
+implements> schema_order_v3(1.0)
+calls> endpoint_create_order(1.0)
+net release_safe and2 compatible covered
+addf check_compat0 contract [interface: api_orders] [target: schema_order_v3]
