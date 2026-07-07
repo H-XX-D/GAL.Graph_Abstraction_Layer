@@ -17,7 +17,7 @@ behavior behind adapters.
 HAL contributes reusable graph patterns that other GAL dialects can borrow:
 
 - Capability discovery: model what the substrate can do before scheduling work.
-- Driver/adaptor boundaries: separate stable operations from device-specific
+- Driver/adapter boundaries: separate stable operations from device-specific
   implementation.
 - Resource inventory: expose device capacity, topology, and allocation state to
   RAL and TAL.
