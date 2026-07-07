@@ -54,28 +54,28 @@ GAL dialects share the GAL:netlist syntax and specialize validation vocabulary:
 
 | dialect | name | domain |
 |---|---|---|
-| `mal.v0` | Memory Abstraction Language | claims, evidence, memory programs |
-| `dal.v0` | Deployment Abstraction Layer | services, releases, rollout state |
-| `pal.v0` | Policy Abstraction Layer | rules, obligations, decisions |
 | `aal.v0` | Agent Abstraction Layer | agents, tools, tasks, handoffs |
-| `wal.v0` | Workflow Abstraction Layer | steps, jobs, gates, retries |
-| `oal.v0` | Observability Abstraction Layer | signals, alerts, traces, monitors |
-| `hal.v0` | Hardware Abstraction Layer | devices, buses, drivers, firmware, capabilities |
-| `ral.v0` | Resource Abstraction Layer | compute, storage, network, quota |
-| `sal.v0` | State Abstraction Layer | state, snapshots, migrations, consistency |
-| `eal.v0` | Event Abstraction Layer | events, streams, triggers, replay |
-| `cal.v0` | Capability Abstraction Layer | permissions, tools, grants, negotiation |
-| `ial.v0` | Interface Abstraction Layer | APIs, contracts, schemas, protocols |
-| `tal.v0` | Topology Abstraction Layer | regions, clusters, routes, placement |
-| `qal.v0` | Quality Abstraction Layer | SLOs, guarantees, constraints, correctness |
-| `fal.v0` | Failure Abstraction Layer | failures, blast radius, recovery paths |
-| `kal.v0` | Knowledge Abstraction Layer | concepts, sources, provenance |
-| `real.v0` | Reasoning Abstraction Layer | hypotheses, plans, critiques, decisions |
-| `lal.v0` | Learning Abstraction Layer | examples, feedback, evaluations, preference updates |
-| `goval.v0` | Governance Abstraction Layer | ownership, authority, lifecycle, escalation |
-| `riskal.v0` | Risk Abstraction Layer | risks, controls, mitigations, acceptance |
 | `audal.v0` | Audit Abstraction Layer | evidence, attestations, receipts, trails |
+| `cal.v0` | Capability Abstraction Layer | permissions, tools, grants, negotiation |
+| `dal.v0` | Deployment Abstraction Layer | services, releases, rollout state |
+| `eal.v0` | Event Abstraction Layer | events, streams, triggers, replay |
+| `fal.v0` | Failure Abstraction Layer | failures, blast radius, recovery paths |
+| `goval.v0` | Governance Abstraction Layer | ownership, authority, lifecycle, escalation |
+| `hal.v0` | Hardware Abstraction Layer | devices, buses, drivers, firmware, capabilities |
+| `ial.v0` | Interface Abstraction Layer | APIs, contracts, schemas, protocols |
+| `kal.v0` | Knowledge Abstraction Layer | concepts, sources, provenance |
+| `lal.v0` | Learning Abstraction Layer | examples, feedback, evaluations, preference updates |
+| `mal.v0` | Memory Abstraction Language | claims, evidence, memory programs |
+| `oal.v0` | Observability Abstraction Layer | signals, alerts, traces, monitors |
+| `pal.v0` | Policy Abstraction Layer | rules, obligations, decisions |
+| `qal.v0` | Quality Abstraction Layer | SLOs, guarantees, constraints, correctness |
+| `ral.v0` | Resource Abstraction Layer | compute, storage, network, quota |
+| `real.v0` | Reasoning Abstraction Layer | hypotheses, plans, critiques, decisions |
+| `riskal.v0` | Risk Abstraction Layer | risks, controls, mitigations, acceptance |
+| `sal.v0` | State Abstraction Layer | state, snapshots, migrations, consistency |
+| `tal.v0` | Topology Abstraction Layer | regions, clusters, routes, placement |
 | `val.v0` | Verification Abstraction Layer | tests, checks, proofs, acceptance criteria |
+| `wal.v0` | Workflow Abstraction Layer | steps, jobs, gates, retries |
 
 These dialects are optional lenses over graph state. A runtime should load only
 the dialects it needs, and cross-dialect edges should stay explicit.
