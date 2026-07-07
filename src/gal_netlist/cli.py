@@ -33,6 +33,7 @@ def main(argv: list[str] | None = None) -> int:
 
     dialects_cmd = subparsers.add_parser("dialects", help="list available dialect specs")
     dialects_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
+    dialects_cmd.add_argument("--json", action="store_true", help="emit JSON dialect registry")
 
     components_cmd = subparsers.add_parser("components", help="list registered net and standing operation components")
     components_cmd.add_argument("--dialect-dir", type=Path, action="append", help="directory containing dialect markdown specs")
@@ -54,6 +55,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "dialects":
         registry = load_registry(args.dialect_dir or default_dialect_dirs(Path.cwd()))
+        if args.json:
+            print(json.dumps(registry.to_dict(), indent=2, sort_keys=True))
+            return 0
         for dialect_id in registry.ids():
             print(dialect_id)
         return 0

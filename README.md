@@ -103,6 +103,7 @@ gal load examples/dialects/hal.gal --mode plan
 gal load examples/dialects/hal.gal --mode replay
 gal components --json
 gal dialects
+gal dialects --json
 ```
 
 The current CLI shape is:
@@ -123,6 +124,7 @@ gal load graph.gal --mode merge --runtime-json runtime.json
 gal components
 gal components --kind net-op --json
 gal dialects
+gal dialects --json
 ```
 
 `gal verify` parses, canonicalizes, checks semantic round-trip, and validates the

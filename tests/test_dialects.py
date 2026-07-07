@@ -1,5 +1,7 @@
+import json
 from pathlib import Path
 
+from gal_netlist.cli import main
 from gal_netlist.dialects import default_dialect_dirs, load_registry, validate_document
 from gal_netlist.parser import parse_text
 
@@ -12,6 +14,9 @@ def test_registry_loads_markdown_vocabularies():
     assert "mal.v0" in registry.ids()
     assert "hal.v0" in registry.ids()
     assert registry.get("hal.v0")["nodeKinds"][0] == "device"
+    payload = registry.to_dict()
+    assert payload["schema"] == "gal.dialects.v0"
+    assert payload["dialects"]["mal.v0"]["signals"][0] == "weak"
 
 
 def test_examples_validate_against_declared_dialects():
@@ -63,3 +68,10 @@ def test_net_inputs_can_reference_declared_graph_symbols():
 def test_default_dialect_dirs_finds_repo_docs():
     candidates = default_dialect_dirs(ROOT / "examples" / "minimal.mal.gal")
     assert ROOT / "docs" / "dialects" in candidates
+
+
+def test_cli_dialects_json_outputs_registry(capsys):
+    assert main(["dialects", "--dialect-dir", str(ROOT / "docs" / "dialects"), "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["schema"] == "gal.dialects.v0"
+    assert payload["dialects"]["hal.v0"]["nodeKinds"][0] == "device"

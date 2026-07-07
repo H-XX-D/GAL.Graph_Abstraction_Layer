@@ -10,6 +10,7 @@ from typing import Any, Iterable
 
 
 VOCAB_RE = re.compile(r"```json\s*(\{.*?\})\s*```", re.DOTALL)
+DIALECT_REGISTRY_SCHEMA = "gal.dialects.v0"
 
 
 @dataclass(frozen=True)
@@ -41,6 +42,12 @@ class DialectRegistry:
 
     def ids(self) -> list[str]:
         return sorted(self.specs)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema": DIALECT_REGISTRY_SCHEMA,
+            "dialects": {dialect_id: self.specs[dialect_id] for dialect_id in self.ids()},
+        }
 
 
 def load_registry(dialect_dirs: Iterable[Path]) -> DialectRegistry:
