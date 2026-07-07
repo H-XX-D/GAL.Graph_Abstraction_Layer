@@ -19,6 +19,10 @@ format and implementation surface.
 
 ## Phase 1: Parser And Renderer
 
+Status: initial implementation landed. The current Python package parses the
+checked-in GAL examples, renders canonical GAL text, and verifies semantic
+round-trips.
+
 - Implement a tokenizer that respects quoted strings, bracket parameters, and
   trailing comments.
 - Parse every line into typed AST entries with line and column diagnostics.

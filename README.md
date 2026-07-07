@@ -82,11 +82,26 @@ the dialects it needs, and cross-dialect edges should stay explicit.
 
 ## Development Notes
 
-The suggested future CLI shape is:
+Install the local CLI in editable mode:
+
+```bash
+python3 -m pip install -e ".[dev]"
+```
+
+Run the current checks:
+
+```bash
+python3 -m pytest -q
+gal verify examples/minimal.mal.gal
+gal parse examples/dialects/hal.gal --json
+gal format examples/dialects/hal.gal
+```
+
+The current CLI shape is:
 
 ```bash
 gal parse graph.gal --json
 gal format graph.gal
 gal verify graph.gal
-gal convert graph.gal --to dot
+gal convert graph.gal --to json
 ```
