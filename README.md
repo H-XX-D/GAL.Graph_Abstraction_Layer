@@ -58,6 +58,9 @@ gal convert starter.hal.gal --to dot
 - [docs/schemas/](docs/schemas/): JSON Schema contracts for CLI payloads.
 - [docs/blog/](docs/blog/): draft launch and design posts with generated
   image assets.
+- [.claude/skills/fallacy-guard/](.claude/skills/fallacy-guard/): Claude Code
+  project skill for detecting logical fallacies and repairing arguments with
+  formal, probabilistic, causal, and decision-theoretic guardrails.
 - [examples/minimal.mal.gal](examples/minimal.mal.gal): minimal MAL dialect
   example using GAL:netlist syntax.
 - [examples/dialects/](examples/dialects/): minimal examples for draft dialects.
