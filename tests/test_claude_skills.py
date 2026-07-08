@@ -4,6 +4,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_DIR = ROOT / ".claude" / "skills" / "fallacy-guard"
+COMMAND_PATH = ROOT / ".claude" / "commands" / "fallacy-guard.md"
 
 
 EXPECTED_FALLACIES = [
@@ -91,6 +92,17 @@ def test_fallacy_guard_skill_has_claude_frontmatter():
     assert "math-guards.md" in text
 
 
+def test_fallacy_guard_legacy_command_wrapper_points_to_skill():
+    text = COMMAND_PATH.read_text(encoding="utf-8")
+
+    assert text.startswith("---\n")
+    assert "description:" in text.split("---", 2)[1]
+    assert "$ARGUMENTS" in text
+    assert ".claude/skills/fallacy-guard/SKILL.md" in text
+    assert ".claude/skills/fallacy-guard/fallacy-catalog.md" in text
+    assert ".claude/skills/fallacy-guard/math-guards.md" in text
+
+
 def test_fallacy_catalog_covers_requested_fallacies_in_order():
     text = (SKILL_DIR / "fallacy-catalog.md").read_text(encoding="utf-8")
     rows = re.findall(r"^\| (\d+) \| ([^|]+) \|", text, flags=re.MULTILINE)
@@ -148,6 +160,7 @@ def test_source_distribution_includes_project_skill_files():
     text = (ROOT / "MANIFEST.in").read_text(encoding="utf-8")
 
     assert "recursive-include .claude/skills/fallacy-guard *.md" in text
+    assert "recursive-include .claude/commands *.md" in text
 
 
 def _catalog_cells(line: str) -> list[str]:
