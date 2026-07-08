@@ -114,12 +114,32 @@ def test_math_guards_cover_core_formalisms():
     text = (SKILL_DIR / "math-guards.md").read_text(encoding="utf-8")
 
     for phrase in (
+        "Math Used To Support Or Refute Reasoning",
         "Deductive Validity",
         "Bayesian Relevance",
         "Statistical Induction",
         "Causal Reasoning",
         "Decision Theory",
         "Consistency And Coherence",
+    ):
+        assert phrase in text
+
+
+def test_math_guards_cover_reasoning_toolbox_entries():
+    text = (SKILL_DIR / "math-guards.md").read_text(encoding="utf-8")
+
+    for phrase in (
+        "Propositional logic",
+        "First-order logic",
+        "Rules of inference",
+        "Truth tables",
+        "Proof by contradiction",
+        "Counterexamples",
+        "Set theory",
+        "Model theory",
+        "Proof theory",
+        "Computability theory",
+        "Category theory",
     ):
         assert phrase in text
 

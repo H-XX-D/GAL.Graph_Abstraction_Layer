@@ -24,6 +24,67 @@ uncertainty is represented honestly
 known counterevidence is included
 ```
 
+## Math Used To Support Or Refute Reasoning
+
+Use this toolbox to choose the right formal check for the argument.
+
+1. Propositional logic
+
+Checks whether statements are true or false. Use it for `and`, `or`, `not`,
+and `if...then` claims.
+
+2. First-order logic
+
+Adds variables, predicates, and quantifiers. Use it to express general claims
+such as `for all x` or `there exists x`.
+
+3. Rules of inference
+
+Derive conclusions from premises. Core examples include modus ponens, modus
+tollens, and hypothetical syllogism.
+
+4. Truth tables
+
+Test whether an argument is valid or a statement is always true. Use them to
+check equivalence, contradiction, tautology, and invalid conditional forms.
+
+5. Proof by contradiction
+
+Assume the opposite, then show it leads to impossibility. Use it to support a
+claim by eliminating alternatives or exposing inconsistent assumptions.
+
+6. Counterexamples
+
+Find one example that breaks a universal claim. Use counterexamples to refute
+overbroad reasoning quickly.
+
+7. Set theory
+
+Reason about groups, membership, subsets, intersections, exclusions, and
+relations. Use it for formal definitions and structured arguments about
+categories.
+
+8. Model theory
+
+Check whether a statement is true in an interpretation or structure. Use it to
+test whether a theory can actually be satisfied.
+
+9. Proof theory
+
+Study formal derivations from axioms. Use it to check what can be proven inside
+a system and which rules are being assumed.
+
+10. Computability theory
+
+Study what can or cannot be decided by an algorithm. Use it to show limits of
+mechanical reasoning or automated verification.
+
+11. Category theory
+
+Study abstract structure and relationships between structures. Use it for
+high-level formal reasoning about mappings, composition, invariants, and
+structure-preserving transformations.
+
 ## Deductive Validity
 
 Use truth tables, natural deduction, or syllogistic distribution.
