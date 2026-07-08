@@ -26,6 +26,11 @@ jobs:
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        with:
+          # Create the Pages site via API if the repo doesn't have one yet.
+          # Without this, the first run fails with
+          # 'Create Pages site failed. Resource not accessible by integration'.
+          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
