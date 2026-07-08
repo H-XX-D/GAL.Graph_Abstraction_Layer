@@ -30,6 +30,7 @@ def main(argv: list[str] | None = None) -> int:
 
     run([sys.executable, "-m", "pytest", "-q"])
     run([sys.executable, "-m", "build"])
+    check_distribution_artifacts()
     smoke_installed_wheel()
     smoke_checkout_cli()
     print_next_steps(args.tag)
@@ -76,6 +77,13 @@ def require_clean_worktree() -> None:
 def remove_build_outputs() -> None:
     shutil.rmtree(DIST, ignore_errors=True)
     shutil.rmtree(BUILD, ignore_errors=True)
+
+
+def check_distribution_artifacts() -> None:
+    artifacts = sorted(DIST.glob("*"))
+    if not artifacts:
+        raise SystemExit(f"no distribution artifacts found in {DIST}")
+    run([sys.executable, "-m", "twine", "check", *map(str, artifacts)])
 
 
 def smoke_installed_wheel() -> None:

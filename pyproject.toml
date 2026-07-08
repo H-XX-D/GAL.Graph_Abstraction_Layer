@@ -15,7 +15,7 @@ authors = [{ name = "GAL contributors" }]
 gal = "gal_netlist.cli:main"
 
 [project.optional-dependencies]
-dev = ["build>=1.2", "jsonschema>=4.23", "pytest>=8"]
+dev = ["build>=1.2", "jsonschema>=4.23", "pytest>=8", "twine>=6.0"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
