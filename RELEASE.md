@@ -33,10 +33,10 @@ The release gate checks version consistency across `pyproject.toml`,
 `src/gal_netlist/_version.py`, `CHANGELOG.md`, and the requested tag. It then
 runs tests, builds the source distribution and wheel, checks the distribution
 artifacts with Twine, smoke-tests the wheel from a temporary virtual
-environment, smoke-tests checkout CLI commands, and prints the manual tag and
-publish commands. It also writes `dist/SHA256SUMS` for the built distribution
-artifacts. It does not tag, push a tag, create a GitHub release, or upload to
-PyPI.
+environment, writes and verifies `dist/SHA256SUMS` for the built distribution
+artifacts, smoke-tests checkout CLI commands, and prints the manual tag and
+publish commands. It does not tag, push a tag, create a GitHub release, or
+upload to PyPI.
 
 During release-gate development only, use:
 
@@ -79,8 +79,9 @@ gh release create v0.1.0 \
 ```
 
 `scripts/release_check.py` generates the release notes file from the matching
-`CHANGELOG.md` version section and writes `dist/SHA256SUMS` for the wheel and
-source distribution. Review the draft release in GitHub before publishing it.
+`CHANGELOG.md` version section and writes a verified `dist/SHA256SUMS` for the
+wheel and source distribution. Review the draft release in GitHub before
+publishing it.
 
 ## Optional PyPI Release
 

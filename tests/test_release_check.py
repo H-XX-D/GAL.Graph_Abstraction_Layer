@@ -118,6 +118,50 @@ def test_release_check_writes_checksum_manifest(tmp_path, monkeypatch):
         f"{hashlib.sha256(wheel.read_bytes()).hexdigest()}  {wheel.name}",
         f"{hashlib.sha256(sdist.read_bytes()).hexdigest()}  {sdist.name}",
     ]
+    release_check.verify_checksum_manifest()
+
+
+def test_release_check_rejects_stale_checksum_manifest(tmp_path, monkeypatch):
+    release_check = load_release_check()
+    dist = tmp_path / "dist"
+    dist.mkdir()
+    wheel = dist / "gal_netlist-0.1.0-py3-none-any.whl"
+    sdist = dist / "gal_netlist-0.1.0.tar.gz"
+    wheel.write_bytes(b"wheel")
+    sdist.write_bytes(b"sdist")
+    checksums = dist / "SHA256SUMS"
+    monkeypatch.setattr(release_check, "DIST", dist)
+    monkeypatch.setattr(release_check, "CHECKSUMS", checksums)
+
+    release_check.write_checksum_manifest()
+    wheel.write_bytes(b"changed")
+    try:
+        release_check.verify_checksum_manifest()
+    except SystemExit as exc:
+        assert f"checksum mismatch for {wheel.name}" in str(exc)
+    else:
+        raise AssertionError("expected stale checksum manifest to fail")
+
+
+def test_release_check_rejects_incomplete_checksum_manifest(tmp_path, monkeypatch):
+    release_check = load_release_check()
+    dist = tmp_path / "dist"
+    dist.mkdir()
+    wheel = dist / "gal_netlist-0.1.0-py3-none-any.whl"
+    sdist = dist / "gal_netlist-0.1.0.tar.gz"
+    wheel.write_bytes(b"wheel")
+    sdist.write_bytes(b"sdist")
+    checksums = dist / "SHA256SUMS"
+    monkeypatch.setattr(release_check, "DIST", dist)
+    monkeypatch.setattr(release_check, "CHECKSUMS", checksums)
+
+    checksums.write_text(f"{hashlib.sha256(wheel.read_bytes()).hexdigest()}  {wheel.name}\n", encoding="utf-8")
+    try:
+        release_check.verify_checksum_manifest()
+    except SystemExit as exc:
+        assert f"checksum manifest missing artifacts: {sdist.name}" in str(exc)
+    else:
+        raise AssertionError("expected incomplete checksum manifest to fail")
 
 
 def test_ci_runs_release_version_check():

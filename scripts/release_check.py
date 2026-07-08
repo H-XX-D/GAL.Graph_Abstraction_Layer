@@ -52,6 +52,7 @@ def main(argv: list[str] | None = None) -> int:
     write_release_notes()
     check_distribution_artifacts()
     write_checksum_manifest()
+    verify_checksum_manifest()
     smoke_installed_wheel()
     smoke_checkout_cli()
     print_next_steps(args.tag)
@@ -146,10 +147,39 @@ def write_checksum_manifest() -> Path:
 
     lines = []
     for artifact in artifacts:
-        digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
-        lines.append(f"{digest}  {artifact.name}")
+        lines.append(f"{sha256_file(artifact)}  {artifact.name}")
     CHECKSUMS.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return CHECKSUMS
+
+
+def verify_checksum_manifest() -> None:
+    if not CHECKSUMS.is_file():
+        raise SystemExit(f"checksum manifest not found: {CHECKSUMS}")
+
+    expected_artifacts = {artifact.name: artifact for artifact in distribution_artifacts()}
+    seen: set[str] = set()
+    for line in CHECKSUMS.read_text(encoding="utf-8").splitlines():
+        digest, separator, name = line.partition("  ")
+        if not separator:
+            raise SystemExit(f"malformed checksum line: {line}")
+        if not re.fullmatch(r"[0-9a-f]{64}", digest):
+            raise SystemExit(f"malformed checksum digest for {name}")
+        if Path(name).name != name:
+            raise SystemExit(f"checksum path must be a dist filename: {name}")
+        artifact = expected_artifacts.get(name)
+        if artifact is None:
+            raise SystemExit(f"checksum references unknown artifact: {name}")
+        if sha256_file(artifact) != digest:
+            raise SystemExit(f"checksum mismatch for {name}")
+        seen.add(name)
+
+    missing = set(expected_artifacts) - seen
+    if missing:
+        raise SystemExit("checksum manifest missing artifacts: " + ", ".join(sorted(missing)))
+
+
+def sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def write_release_notes() -> Path:
