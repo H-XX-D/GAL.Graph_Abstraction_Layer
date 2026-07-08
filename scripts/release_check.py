@@ -24,6 +24,11 @@ WHEEL = DIST / f"gal_netlist-{VERSION}-py3-none-any.whl"
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
 
+    if args.version_only:
+        validate_release_version(args.tag)
+        print(f"release version ok: {VERSION}")
+        return 0
+
     if not args.allow_dirty:
         require_clean_worktree()
 
@@ -59,6 +64,11 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
         "--tag",
         default=f"v{VERSION}",
         help="tag name to print in the final release instructions",
+    )
+    parser.add_argument(
+        "--version-only",
+        action="store_true",
+        help="only check release version consistency, then exit",
     )
     return parser.parse_args(argv)
 

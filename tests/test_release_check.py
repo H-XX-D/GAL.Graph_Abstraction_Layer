@@ -29,6 +29,19 @@ def test_release_check_help():
 
     assert "Run the GAL 0.1.0 local release gate" in result.stdout
     assert "--allow-dirty" in result.stdout
+    assert "--version-only" in result.stdout
+
+
+def test_release_check_version_only_mode():
+    result = subprocess.run(
+        [sys.executable, "scripts/release_check.py", "--version-only"],
+        cwd=ROOT,
+        check=True,
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.stdout.strip() == "release version ok: 0.1.0"
 
 
 def test_release_check_runs_twine_check_and_dev_extra_includes_twine():
@@ -58,3 +71,9 @@ def test_release_check_rejects_mismatched_tag():
         assert "tag: 9.9.9" in str(exc)
     else:
         raise AssertionError("expected mismatched tag to fail")
+
+
+def test_ci_runs_release_version_check():
+    workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+
+    assert "python scripts/release_check.py --version-only" in workflow

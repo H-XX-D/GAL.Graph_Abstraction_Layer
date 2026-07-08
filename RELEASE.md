@@ -43,6 +43,12 @@ During release-gate development only, use:
 python3 scripts/release_check.py --allow-dirty
 ```
 
+To run only the version consistency check:
+
+```bash
+python3 scripts/release_check.py --version-only
+```
+
 ## GitHub Source Release
 
 After the local gate passes, create and push an annotated tag:
