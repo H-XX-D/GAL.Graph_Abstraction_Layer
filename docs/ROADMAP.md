@@ -102,12 +102,25 @@ filter them by dialect.
 - Add a starter-file generator for registered dialects.
 - Bundle examples and expose them through the CLI.
 
-## Near-Term Deliverable
+## Release Readiness
 
-The first useful release should include:
+The repository has enough implemented surface for a first `0.1.0` release
+candidate. Before tagging or publishing a package, finish these decisions and
+checks:
 
-- `gal parse`
-- `gal format`
-- `gal verify`
-- Round-trip fixtures
-- `mal.v0` dialect validation
+- Decide whether `0.1.0` is a source-only GitHub release, a PyPI package
+  release, or both.
+- Decide whether the package should remain named `gal-netlist` or reserve a
+  broader distribution name before the first public package publish.
+- Confirm the public README language, especially the draft status and dialect
+  stability expectations.
+- Confirm that `GAL_NETLIST_SPEC.md`, `docs/dialects/*.md`, and bundled
+  examples describe the same syntax and validation behavior.
+- Add release instructions for building, verifying, tagging, and publishing the
+  package.
+- Tag the release only after local tests, package build, installed-wheel smoke
+  tests, CI, and Pages deployment are green for the exact commit.
+
+The next engineering increment is release automation:
+`scripts/release_check.py` runs the local release gate in one place and prints
+the tag/publish commands without performing destructive actions.

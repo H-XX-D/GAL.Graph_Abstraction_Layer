@@ -59,6 +59,8 @@ gal convert starter.hal.gal --to dot
 - [examples/minimal.mal.gal](examples/minimal.mal.gal): minimal MAL dialect
   example using GAL:netlist syntax.
 - [examples/dialects/](examples/dialects/): minimal examples for draft dialects.
+- [scripts/release_check.py](scripts/release_check.py): local release gate that
+  verifies tests, package build, installed-wheel smoke tests, and CLI smokes.
 - [docs/index.html](docs/index.html): static project page deployed with GitHub
   Pages.
 
@@ -138,6 +140,7 @@ Run the current checks:
 ```bash
 python3 -m pytest -q
 python3 -m build
+python3 scripts/release_check.py --allow-dirty
 gal --version
 gal doctor --json
 gal examples
