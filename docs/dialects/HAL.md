@@ -12,6 +12,37 @@ itself; it is the boundary discipline: expose stable capabilities and state whil
 isolating device-specific registers, buses, firmware quirks, and vendor
 behavior behind adapters.
 
+## Research Inspirations
+
+HAL keeps the GAL surface small, but it borrows boundary discipline from mature
+hardware abstraction systems:
+
+- Operating-system HALs hide low-level hardware differences from kernels and
+  drivers while exposing a stable call surface.
+- Embedded common I/O layers let application code use the same API across
+  different MCU reference boards and serial peripherals.
+- Devicetree-style hardware descriptions treat hardware layout and initial
+  configuration as data that can be validated before runtime.
+- Layered embedded stacks separate register-level operations, HAL steps, driver
+  APIs, and application-facing behavior.
+- Hardware error architectures make error sources, handlers, firmware reports,
+  and persistent records explicit enough for recovery and audit.
+
+Sources used while refining this dialect:
+
+- Microsoft Learn, Windows kernel-mode HAL library:
+  <https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/windows-kernel-mode-hal-library>
+- AWS FreeRTOS Common I/O:
+  <https://docs.aws.amazon.com/freertos/latest/userguide/common-io.html>
+- Zephyr Project Devicetree documentation:
+  <https://docs.zephyrproject.org/latest/build/dts/index.html>
+- Espressif ESP-IDF Hardware Abstraction guide:
+  <https://docs.espressif.com/projects/esp-idf/en/release-v4.3/esp32/api-guides/hardware-abstraction.html>
+- Apache Mynewt HAL documentation:
+  <https://mynewt.apache.org/latest/os/modules/hal/hal.html>
+- Microsoft Learn, Windows Hardware Error Architecture components:
+  <https://learn.microsoft.com/en-us/windows-hardware/drivers/whea/components-of-the-windows-hardware-error-architecture>
+
 ## What GAL Can Recycle
 
 HAL contributes reusable graph patterns that other GAL dialects can borrow:
@@ -65,8 +96,26 @@ HAL contributes reusable graph patterns that other GAL dialects can borrow:
 - `reset_device` and `bind_driver` operations must be privileged and explicit.
 - `firmware` nodes should preserve version, revision, and compatibility context.
 - `capability` nodes should be reusable by CAL, RAL, TAL, IAL, OAL, FAL, and VAL.
+- `adapter` nodes should own vendor-specific behavior and expose only stable
+  operations to the rest of the graph.
+- `interrupt` and `sensor` nodes should preserve event source and sampling
+  context so OAL, FAL, and AUDAL can reconstruct what happened.
+- `dma` paths should model direction, target fabric, and safety state before
+  any loader plans data movement.
 - `verify` mode must only inspect; it must not reset, flash, bind, or mutate
   hardware.
+
+## Cross-Dialect Handoffs
+
+HAL should not try to become a full resource, policy, or observability dialect.
+Instead, it should hand off explicit graph facts:
+
+- RAL consumes `capability`, `device`, and `bus` capacity for scheduling.
+- TAL consumes `attached_to` and `maps_to` topology for placement.
+- IAL consumes `compatible_with` and `exposes` relations for interface matching.
+- OAL and FAL consume `faulted`, `thermal`, `reset_required`, `interrupt`, and
+  `sensor` surfaces for alerting and recovery.
+- VAL consumes `check_firmware`, `probe`, and compatibility evidence for gates.
 
 ## Example
 
@@ -78,16 +127,25 @@ device_gpu0 "GPU device 0" health(0.94) temperature(68) power(0.62) [kind: devic
 driver_gpu "GPU driver" revision(535) health(0.91) [kind: driver]
 bus_pcie0 "PCIe bus 0" capacity(0.80) latency(0.03) [kind: bus]
 firmware_gpu0 "GPU firmware 1.2.7" revision(127) risk(0.18) [kind: firmware]
+adapter_cuda0 "GPU portability adapter" health(0.90) latency(0.04) [kind: adapter]
 cap_tensor "Tensor acceleration capability" throughput(0.86) [kind: capability]
+sensor_temp0 "GPU board temperature sensor" temperature(68) [kind: sensor]
+interrupt_thermal0 "Thermal interrupt source" risk(0.31) [kind: interrupt]
+dma_copy0 "Host to GPU DMA path" throughput(0.78) risk(0.12) [kind: dma]
 
 device_gpu0 attached_to> bus_pcie0(1.0)
 device_gpu0 driven_by> driver_gpu(1.0)
 device_gpu0 supports> cap_tensor(0.9)
 device_gpu0 requires> firmware_gpu0(1.0)
+driver_gpu compatible_with> firmware_gpu0(0.9)
+adapter_cuda0 exposes> cap_tensor(1.0)
+dma_copy0 maps_to> bus_pcie0(1.0)
+interrupt_thermal0 streams_to> sensor_temp0(1.0)
 
 net device_ready and2 present compatible
 net needs_service or2 faulted thermal
 addf probe0 hardware [device: device_gpu0] [interval: 30s]
 addf check_firmware0 tick [device: device_gpu0] [policy: compatible]
+addf map_capability0 probe [device: device_gpu0] [capability: cap_tensor]
 setp probe0.interval 60s
 ```

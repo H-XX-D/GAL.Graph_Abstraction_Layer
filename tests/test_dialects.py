@@ -27,6 +27,17 @@ def test_examples_validate_against_declared_dialects():
         assert validate_document(document, registry) == [], path
 
 
+def test_every_registered_dialect_has_an_example():
+    registry = load_registry([ROOT / "docs" / "dialects"])
+    example_dialects = set()
+    for path in sorted((ROOT / "examples" / "dialects").glob("*.gal")):
+        document = parse_text(path.read_text(encoding="utf-8"))
+        if document.get("dialect"):
+            example_dialects.add(document["dialect"])
+
+    assert set(registry.ids()) <= example_dialects | {"mal.v0"}
+
+
 def test_unknown_node_kind_reports_structured_validation_issue():
     registry = load_registry([ROOT / "docs" / "dialects"])
     document = parse_text('@gal netlist.v0\n@dialect mal.v0\nbad "Bad" [kind: device]\n')

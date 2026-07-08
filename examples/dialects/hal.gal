@@ -4,7 +4,25 @@
 device_gpu0 "GPU device 0" health(0.94) temperature(68) [kind: device]
 driver_gpu "GPU driver" revision(535) health(0.91) [kind: driver]
 bus_pcie0 "PCIe bus 0" capacity(0.80) latency(0.03) [kind: bus]
+firmware_gpu0 "GPU firmware 1.2.7" revision(127) risk(0.18) [kind: firmware]
+adapter_cuda0 "GPU portability adapter" health(0.90) latency(0.04) [kind: adapter]
+cap_tensor "Tensor acceleration capability" throughput(0.86) [kind: capability]
+sensor_temp0 "GPU board temperature sensor" temperature(68) [kind: sensor]
+interrupt_thermal0 "Thermal interrupt source" risk(0.31) [kind: interrupt]
+dma_copy0 "Host to GPU DMA path" throughput(0.78) risk(0.12) [kind: dma]
+
 device_gpu0 attached_to> bus_pcie0(1.0)
 device_gpu0 driven_by> driver_gpu(1.0)
+device_gpu0 supports> cap_tensor(0.9)
+device_gpu0 requires> firmware_gpu0(1.0)
+driver_gpu compatible_with> firmware_gpu0(0.9)
+adapter_cuda0 exposes> cap_tensor(1.0)
+dma_copy0 maps_to> bus_pcie0(1.0)
+interrupt_thermal0 streams_to> sensor_temp0(1.0)
+
 net device_ready and2 present compatible
+net needs_service or2 faulted thermal
 addf probe0 hardware [device: device_gpu0] [interval: 30s]
+addf check_firmware0 tick [device: device_gpu0] [policy: compatible]
+addf map_capability0 probe [device: device_gpu0] [capability: cap_tensor]
+setp probe0.interval 60s

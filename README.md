@@ -1,19 +1,50 @@
 # GAL.Graph_Abstraction_Layer
 
-Graph Abstraction Layer defines a small, inspectable interchange layer for graph
-runtime state.
+[![CI](https://github.com/H-XX-D/GAL.Graph_Abstraction_Layer/actions/workflows/ci.yml/badge.svg)](https://github.com/H-XX-D/GAL.Graph_Abstraction_Layer/actions/workflows/ci.yml)
+[![Docs](https://github.com/H-XX-D/GAL.Graph_Abstraction_Layer/actions/workflows/pages.yml/badge.svg)](https://github.com/H-XX-D/GAL.Graph_Abstraction_Layer/actions/workflows/pages.yml)
 
-The first concrete syntax profile is `GAL:netlist`: a line-oriented format for
-nodes, edges, signal wiring, standing operations, and runtime parameter changes.
-MAL is a memory-focused dialect of GAL, expressed through the GAL:netlist syntax.
+Graph Abstraction Layer (GAL) is a small, inspectable interchange layer for
+graph-runtime state: nodes, edges, signal wiring, standing operations, runtime
+parameter changes, and domain-specific validation vocabularies.
+
+The first concrete syntax profile is `GAL:netlist`, a line-oriented format
+designed for semantic round trips and adapter-friendly tooling. Dialects such as
+MAL, HAL, DAL, PAL, and VAL all use the same syntax while specializing the
+allowed vocabulary for a runtime domain.
 
 ## Current Status
 
 Status: draft v0.1.
 
-This repository is in the definition phase. The immediate goal is to freeze the
-core AST shape, validate the line grammar with examples, and then build a small
-parser/renderer pair with semantic round-trip tests.
+The repository currently includes a Python CLI, parser, canonical renderer,
+semantic round-trip verification, JSON/DOT/YAML/Cypher converters, runtime load
+reports, bundled examples, JSON Schema contracts, GitHub Actions CI, and static
+GitHub Pages documentation.
+
+## Quickstart
+
+Install locally:
+
+```bash
+python3 -m pip install -e ".[dev]"
+```
+
+Verify the package and examples:
+
+```bash
+python3 -m pytest -q
+gal verify-all examples --json
+gal dialects
+gal examples
+```
+
+Create and verify a starter graph:
+
+```bash
+gal init starter.hal.gal --dialect hal.v0
+gal verify starter.hal.gal
+gal convert starter.hal.gal --to dot
+```
 
 ## Repository Map
 
@@ -22,6 +53,8 @@ parser/renderer pair with semantic round-trip tests.
 - [docs/GLOSSARY.md](docs/GLOSSARY.md): working terms and vocabulary.
 - [docs/dialects/](docs/dialects/): draft GAL dialect specifications.
 - [docs/schemas/](docs/schemas/): JSON Schema contracts for CLI payloads.
+- [docs/blog/](docs/blog/): draft launch and design posts with generated
+  image assets.
 - [examples/minimal.mal.gal](examples/minimal.mal.gal): minimal MAL dialect
   example using GAL:netlist syntax.
 - [examples/dialects/](examples/dialects/): minimal examples for draft dialects.
@@ -40,14 +73,16 @@ The second AST must be semantically equivalent to the first. Formatting,
 comments, and whitespace can be handled by a richer editor layer, but the core
 interchange guarantee is semantic preservation.
 
-## First Implementation Milestones
+## Implemented Surface
 
-1. Freeze the AST categories and error shape.
-2. Implement parser support for headers, nodes, bodies, edges, nets, schedules,
-   parameter sets, and comments.
-3. Implement canonical rendering.
-4. Add semantic round-trip tests and fixture examples.
-5. Add JSON, DOT, and YAML conversion commands.
+- Parser support for headers, dialect declarations, nodes, bodies, edges, nets,
+  schedules, parameter sets, and comments.
+- Canonical rendering and semantic round-trip verification.
+- Dialect registry loaded from Markdown vocabulary blocks.
+- Bundled dialect and example assets available after wheel install.
+- JSON, DOT, YAML, and Cypher conversion commands.
+- In-memory load reports for `verify`, `plan`, `replay`, and `merge` modes.
+- JSON Schema publishing for CLI payloads and adapter contracts.
 
 ## Draft Dialects
 
@@ -79,7 +114,15 @@ GAL dialects share the GAL:netlist syntax and specialize validation vocabulary:
 | `wal.v0` | Workflow Abstraction Layer | steps, jobs, gates, retries |
 
 These dialects are optional lenses over graph state. A runtime should load only
-the dialects it needs, and cross-dialect edges should stay explicit.
+the dialects it needs, and cross-dialect edges should stay explicit. Each
+registered dialect has a Markdown vocabulary and at least one example under
+`examples/dialects/`.
+
+## Draft Blog Posts
+
+- [The GAL Dialect Library](docs/blog/2026-07-07-gal-dialect-library.md)
+- [HAL as a Boundary Discipline for Graph Runtimes](docs/blog/2026-07-07-hal-boundary-discipline.md)
+- [MAL and Durable Memory Graphs](docs/blog/2026-07-07-mal-memory-graphs.md)
 
 ## Development Notes
 

@@ -79,5 +79,6 @@ def test_cli_load_plan_outputs_json(capsys):
     assert main(["load", str(path), "--mode", "plan"]) == 0
     report = json.loads(capsys.readouterr().out)
     assert report["mode"] == "plan"
-    assert report["summary"]["nodes"] == 3
+    assert report["summary"]["nodes"] == 9
     assert any(action["action"] == "create_net" for action in report["actions"])
+    assert any(action["action"] == "schedule_op" and action["op"] == "map_capability0" for action in report["actions"])

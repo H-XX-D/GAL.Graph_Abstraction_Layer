@@ -9,7 +9,27 @@ def test_docs_index_links_schema_catalog():
     text = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
 
     assert 'href="schemas/"' in text
+    assert 'href="blog/"' in text
     assert "JSON Schemas" in (ROOT / "docs" / "schemas" / "index.html").read_text(encoding="utf-8")
+
+
+def test_blog_drafts_reference_workspace_images():
+    blog_dir = ROOT / "docs" / "blog"
+    asset_dir = ROOT / "docs" / "assets" / "blog"
+    drafts = sorted(blog_dir.glob("2026-07-07-*.md"))
+
+    assert {path.name for path in drafts} == {
+        "2026-07-07-gal-dialect-library.md",
+        "2026-07-07-hal-boundary-discipline.md",
+        "2026-07-07-mal-memory-graphs.md",
+    }
+    for draft in drafts:
+        text = draft.read_text(encoding="utf-8")
+        image_refs = [line for line in text.splitlines() if line.startswith("image: ")]
+        assert len(image_refs) == 1
+        image_path = (blog_dir / image_refs[0].removeprefix("image: ").strip()).resolve()
+        assert image_path.is_relative_to(asset_dir.resolve())
+        assert image_path.is_file()
 
 
 def test_schema_catalog_links_generated_schema_files():
