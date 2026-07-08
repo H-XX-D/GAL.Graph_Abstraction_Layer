@@ -66,6 +66,11 @@ gh run list --branch main --limit 5
 gh run list --limit 10
 ```
 
+CI uploads a short-lived `gal-release-artifacts` workflow artifact containing
+the verified wheel, source distribution, `SHA256SUMS`, and generated release
+notes. Use the local `dist/` artifacts for the manual release unless you
+intentionally choose to download the CI-verified bundle.
+
 Create the GitHub release from the built artifacts:
 
 ```bash

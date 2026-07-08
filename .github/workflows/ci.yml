@@ -36,6 +36,18 @@ jobs:
       - name: Check release artifacts
         run: python scripts/release_check.py --artifacts-only
 
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gal-release-artifacts
+          path: |
+            dist/gal_netlist-*.tar.gz
+            dist/gal_netlist-*.whl
+            dist/SHA256SUMS
+            dist/release-notes-v*.md
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Smoke installed wheel
         run: |
           tmpdir="$(mktemp -d)"

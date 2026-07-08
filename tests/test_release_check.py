@@ -199,3 +199,15 @@ def test_ci_checks_release_artifacts_with_release_gate():
     assert "python scripts/release_check.py --artifacts-only" in workflow
     assert "python -m twine check" not in workflow
     assert "python -m twine check dist/*\n" not in workflow
+
+
+def test_ci_uploads_verified_release_artifacts():
+    workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+
+    assert "actions/upload-artifact@v4" in workflow
+    assert "name: gal-release-artifacts" in workflow
+    assert "dist/gal_netlist-*.tar.gz" in workflow
+    assert "dist/gal_netlist-*.whl" in workflow
+    assert "dist/SHA256SUMS" in workflow
+    assert "dist/release-notes-v*.md" in workflow
+    assert "if-no-files-found: error" in workflow
