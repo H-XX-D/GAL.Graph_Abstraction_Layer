@@ -17,7 +17,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
 BUILD = ROOT / "build"
-VERSION = "0.1.0"
+
+
+def read_pyproject_version() -> str:
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    return pyproject["project"]["version"]
+
+
+VERSION = read_pyproject_version()
 WHEEL = DIST / f"gal_netlist-{VERSION}-py3-none-any.whl"
 RELEASE_NOTES = DIST / f"release-notes-v{VERSION}.md"
 
@@ -50,7 +57,7 @@ def main(argv: list[str] | None = None) -> int:
 
 def parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Run the GAL 0.1.0 local release gate without tagging or publishing."
+        description=f"Run the GAL {VERSION} local release gate without tagging or publishing."
     )
     parser.add_argument(
         "--allow-dirty",
@@ -96,14 +103,11 @@ def remove_build_outputs() -> None:
 
 
 def validate_release_version(tag: str) -> None:
-    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
-    pyproject_version = pyproject["project"]["version"]
     fallback_version = _regex_value(ROOT / "src" / "gal_netlist" / "_version.py", r'^FALLBACK_VERSION = "([^"]+)"$')
     changelog_version = _regex_value(ROOT / "CHANGELOG.md", r"^## ([0-9]+\.[0-9]+\.[0-9]+) - \d{4}-\d{2}-\d{2}$")
 
     expected = {
-        "release_check": VERSION,
-        "pyproject": pyproject_version,
+        "pyproject": VERSION,
         "fallback_version": fallback_version,
         "changelog": changelog_version,
         "tag": tag.removeprefix("v"),

@@ -55,6 +55,15 @@ def test_release_check_runs_twine_check_and_dev_extra_includes_twine():
     )
 
 
+def test_release_check_derives_version_from_pyproject():
+    script = RELEASE_CHECK.read_text(encoding="utf-8")
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    release_check = load_release_check()
+
+    assert release_check.VERSION == pyproject["project"]["version"]
+    assert 'VERSION = "0.1.0"' not in script
+
+
 def test_release_check_validates_version_consistency():
     release_check = load_release_check()
 
