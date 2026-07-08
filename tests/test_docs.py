@@ -1,5 +1,9 @@
 from importlib.resources import files
 from pathlib import Path
+import re
+
+from gal_netlist.cli import main
+from gal_netlist.dialects import default_dialect_dirs, load_registry
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -58,3 +62,29 @@ def test_bundled_examples_match_source_examples():
             files("gal_netlist").joinpath("data", "examples", *relative.parts).read_text(encoding="utf-8")
             == source_path.read_text(encoding="utf-8")
         )
+
+
+def test_documented_dialect_tables_match_registry():
+    expected = load_registry(default_dialect_dirs(ROOT)).ids()
+
+    for relative_path in ("README.md", "GAL_NETLIST_SPEC.md"):
+        text = (ROOT / relative_path).read_text(encoding="utf-8")
+        dialect_ids = _dialect_table_ids(text)
+
+        assert dialect_ids == expected
+        assert dialect_ids == sorted(dialect_ids)
+
+
+def test_spec_mal_example_verifies(tmp_path):
+    spec = (ROOT / "GAL_NETLIST_SPEC.md").read_text(encoding="utf-8")
+    match = re.search(r"## 11\. MAL Dialect Sketch.*?```gal\n(?P<gal>.*?)\n```", spec, re.DOTALL)
+    assert match is not None
+
+    path = tmp_path / "spec-mal-example.gal"
+    path.write_text(match.group("gal"), encoding="utf-8")
+
+    assert main(["verify", str(path), "--dialect-dir", str(ROOT / "docs" / "dialects")]) == 0
+
+
+def _dialect_table_ids(text: str) -> list[str]:
+    return re.findall(r"^\| `([^`]+\.v0)` \|", text, flags=re.MULTILINE)
