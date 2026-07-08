@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import os
 import re
 import shutil
@@ -27,6 +28,7 @@ def read_pyproject_version() -> str:
 VERSION = read_pyproject_version()
 WHEEL = DIST / f"gal_netlist-{VERSION}-py3-none-any.whl"
 RELEASE_NOTES = DIST / f"release-notes-v{VERSION}.md"
+CHECKSUMS = DIST / "SHA256SUMS"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -49,6 +51,7 @@ def main(argv: list[str] | None = None) -> int:
     run([sys.executable, "-m", "build"])
     write_release_notes()
     check_distribution_artifacts()
+    write_checksum_manifest()
     smoke_installed_wheel()
     smoke_checkout_cli()
     print_next_steps(args.tag)
@@ -126,10 +129,27 @@ def _regex_value(path: Path, pattern: str) -> str:
 
 
 def check_distribution_artifacts() -> None:
-    artifacts = sorted([*DIST.glob("*.whl"), *DIST.glob("*.tar.gz")])
+    artifacts = distribution_artifacts()
     if not artifacts:
         raise SystemExit(f"no distribution artifacts found in {DIST}")
     run([sys.executable, "-m", "twine", "check", *map(str, artifacts)])
+
+
+def distribution_artifacts() -> list[Path]:
+    return sorted([*DIST.glob("*.whl"), *DIST.glob("*.tar.gz")])
+
+
+def write_checksum_manifest() -> Path:
+    artifacts = distribution_artifacts()
+    if not artifacts:
+        raise SystemExit(f"no distribution artifacts found in {DIST}")
+
+    lines = []
+    for artifact in artifacts:
+        digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
+        lines.append(f"{digest}  {artifact.name}")
+    CHECKSUMS.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return CHECKSUMS
 
 
 def write_release_notes() -> Path:
@@ -237,7 +257,7 @@ def print_next_steps(tag: str) -> None:
     print(f"  git push origin {tag}")
     print(
         f"  gh release create {tag} dist/gal_netlist-{VERSION}.tar.gz "
-        f"dist/gal_netlist-{VERSION}-py3-none-any.whl "
+        f"dist/gal_netlist-{VERSION}-py3-none-any.whl {CHECKSUMS.relative_to(ROOT)} "
         f"--title \"GAL {VERSION}\" --notes-file {RELEASE_NOTES.relative_to(ROOT)} --draft"
     )
     print(

@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 import subprocess
 import sys
 import tomllib
@@ -98,6 +99,25 @@ def test_release_check_writes_version_release_notes(tmp_path, monkeypatch):
 
     assert release_check.write_release_notes() == notes_path
     assert notes_path.read_text(encoding="utf-8").startswith("# GAL 0.1.0")
+
+
+def test_release_check_writes_checksum_manifest(tmp_path, monkeypatch):
+    release_check = load_release_check()
+    dist = tmp_path / "dist"
+    dist.mkdir()
+    sdist = dist / "gal_netlist-0.1.0.tar.gz"
+    wheel = dist / "gal_netlist-0.1.0-py3-none-any.whl"
+    sdist.write_bytes(b"sdist")
+    wheel.write_bytes(b"wheel")
+    checksums = dist / "SHA256SUMS"
+    monkeypatch.setattr(release_check, "DIST", dist)
+    monkeypatch.setattr(release_check, "CHECKSUMS", checksums)
+
+    assert release_check.write_checksum_manifest() == checksums
+    assert checksums.read_text(encoding="utf-8").splitlines() == [
+        f"{hashlib.sha256(wheel.read_bytes()).hexdigest()}  {wheel.name}",
+        f"{hashlib.sha256(sdist.read_bytes()).hexdigest()}  {sdist.name}",
+    ]
 
 
 def test_ci_runs_release_version_check():
