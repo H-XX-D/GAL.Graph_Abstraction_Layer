@@ -73,6 +73,24 @@ def test_release_check_rejects_mismatched_tag():
         raise AssertionError("expected mismatched tag to fail")
 
 
+def test_release_check_extracts_version_release_notes():
+    release_check = load_release_check()
+    notes = release_check.release_notes_for("0.1.0")
+
+    assert notes.startswith("# GAL 0.1.0\n\nReleased: 2026-07-08\n")
+    assert "### Added" in notes
+    assert "## 0.1.0" not in notes
+
+
+def test_release_check_writes_version_release_notes(tmp_path, monkeypatch):
+    release_check = load_release_check()
+    notes_path = tmp_path / "release-notes.md"
+    monkeypatch.setattr(release_check, "RELEASE_NOTES", notes_path)
+
+    assert release_check.write_release_notes() == notes_path
+    assert notes_path.read_text(encoding="utf-8").startswith("# GAL 0.1.0")
+
+
 def test_ci_runs_release_version_check():
     workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
 

@@ -72,11 +72,13 @@ gh release create v0.1.0 \
   dist/gal_netlist-0.1.0.tar.gz \
   dist/gal_netlist-0.1.0-py3-none-any.whl \
   --title "GAL 0.1.0" \
-  --notes-file CHANGELOG.md \
+  --notes-file dist/release-notes-v0.1.0.md \
   --draft
 ```
 
-Review the draft release in GitHub before publishing it.
+`scripts/release_check.py` generates the release notes file from the matching
+`CHANGELOG.md` version section. Review the draft release in GitHub before
+publishing it.
 
 ## Optional PyPI Release
 
@@ -92,13 +94,17 @@ python3 -m pip install --upgrade twine
 Check the artifacts:
 
 ```bash
-python3 -m twine check dist/*
+python3 -m twine check \
+  dist/gal_netlist-0.1.0.tar.gz \
+  dist/gal_netlist-0.1.0-py3-none-any.whl
 ```
 
 Upload only after final approval:
 
 ```bash
-python3 -m twine upload dist/*
+python3 -m twine upload \
+  dist/gal_netlist-0.1.0.tar.gz \
+  dist/gal_netlist-0.1.0-py3-none-any.whl
 ```
 
 ## Post-Release Checks

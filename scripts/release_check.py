@@ -19,6 +19,7 @@ DIST = ROOT / "dist"
 BUILD = ROOT / "build"
 VERSION = "0.1.0"
 WHEEL = DIST / f"gal_netlist-{VERSION}-py3-none-any.whl"
+RELEASE_NOTES = DIST / f"release-notes-v{VERSION}.md"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -39,6 +40,7 @@ def main(argv: list[str] | None = None) -> int:
 
     run([sys.executable, "-m", "pytest", "-q"])
     run([sys.executable, "-m", "build"])
+    write_release_notes()
     check_distribution_artifacts()
     smoke_installed_wheel()
     smoke_checkout_cli()
@@ -120,10 +122,25 @@ def _regex_value(path: Path, pattern: str) -> str:
 
 
 def check_distribution_artifacts() -> None:
-    artifacts = sorted(DIST.glob("*"))
+    artifacts = sorted([*DIST.glob("*.whl"), *DIST.glob("*.tar.gz")])
     if not artifacts:
         raise SystemExit(f"no distribution artifacts found in {DIST}")
     run([sys.executable, "-m", "twine", "check", *map(str, artifacts)])
+
+
+def write_release_notes() -> Path:
+    RELEASE_NOTES.write_text(release_notes_for(VERSION), encoding="utf-8")
+    return RELEASE_NOTES
+
+
+def release_notes_for(version: str) -> str:
+    changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    pattern = rf"^## {re.escape(version)} - (?P<date>\d{{4}}-\d{{2}}-\d{{2}})\n(?P<body>.*?)(?=^## |\Z)"
+    match = re.search(pattern, changelog, flags=re.MULTILINE | re.DOTALL)
+    if match is None:
+        raise SystemExit(f"could not find changelog notes for {version}")
+    body = match.group("body").strip()
+    return f"# GAL {version}\n\nReleased: {match.group('date')}\n\n{body}\n"
 
 
 def smoke_installed_wheel() -> None:
@@ -214,7 +231,15 @@ def print_next_steps(tag: str) -> None:
     print("Manual release commands, after final review:")
     print(f"  git tag -a {tag} -m \"GAL {VERSION}\"")
     print(f"  git push origin {tag}")
-    print("  python -m twine upload dist/*")
+    print(
+        f"  gh release create {tag} dist/gal_netlist-{VERSION}.tar.gz "
+        f"dist/gal_netlist-{VERSION}-py3-none-any.whl "
+        f"--title \"GAL {VERSION}\" --notes-file {RELEASE_NOTES.relative_to(ROOT)} --draft"
+    )
+    print(
+        f"  python -m twine upload dist/gal_netlist-{VERSION}.tar.gz "
+        f"dist/gal_netlist-{VERSION}-py3-none-any.whl"
+    )
 
 
 if __name__ == "__main__":
