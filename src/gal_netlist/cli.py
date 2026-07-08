@@ -11,7 +11,7 @@ from ._version import __version__
 from .components import build_component_registry, validate_components
 from .converters import to_cypher, to_dot, to_yaml
 from .dialects import default_dialect_dirs, load_registry, validate_document
-from .examples import bundled_examples, example_registry, find_example, write_examples
+from .examples import bundled_examples, example_registry, write_examples
 from .loader import LOAD_MODES, load_document
 from .parser import parse_text
 from .renderer import render_document
@@ -61,6 +61,7 @@ def main(argv: list[str] | None = None) -> int:
 
     examples_cmd = subparsers.add_parser("examples", help="list or emit bundled GAL examples")
     examples_cmd.add_argument("--name", help="example name to print or write")
+    examples_cmd.add_argument("--dialect", help="only include examples for a dialect id")
     examples_cmd.add_argument("--write-dir", type=Path, help="write bundled examples into a directory")
     examples_cmd.add_argument("--force", action="store_true", help="overwrite existing files when writing examples")
     examples_cmd.add_argument("--json", action="store_true", help="emit JSON example registry")
@@ -118,8 +119,10 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "examples":
         selected_examples = bundled_examples()
+        if args.dialect:
+            selected_examples = [example for example in selected_examples if example.dialect == args.dialect]
         if args.name:
-            selected = find_example(args.name)
+            selected = next((example for example in selected_examples if example.name == args.name), None)
             if selected is None:
                 print(json.dumps({"ok": False, "error": "unknown_example", "name": args.name}, indent=2), file=sys.stderr)
                 return 1

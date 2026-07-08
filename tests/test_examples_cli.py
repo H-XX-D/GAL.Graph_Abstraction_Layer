@@ -28,11 +28,35 @@ def test_cli_examples_json_outputs_registry(capsys):
     assert {"name": "dialects/hal.gal", "dialect": "hal.v0"} in payload["examples"]
 
 
+def test_cli_examples_filters_by_dialect(capsys):
+    assert main(["examples", "--dialect", "hal.v0"]) == 0
+    out = capsys.readouterr().out
+
+    assert "dialects/hal.gal dialect=hal.v0" in out
+    assert "minimal.mal.gal" not in out
+    assert "dialects/pal.gal" not in out
+
+
+def test_cli_examples_json_filters_by_dialect(capsys):
+    assert main(["examples", "--dialect", "mal.v0", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    Draft202012Validator(get_schema("gal.examples.v0")).validate(payload)
+    assert payload["examples"] == [{"name": "minimal.mal.gal", "dialect": "mal.v0"}]
+
+
 def test_cli_examples_prints_named_example(capsys):
     assert main(["examples", "--name", "minimal.mal.gal"]) == 0
     out = capsys.readouterr().out
 
     assert out.startswith("@gal netlist.v0\n@dialect mal.v0\n")
+
+
+def test_cli_examples_prints_named_example_with_matching_dialect(capsys):
+    assert main(["examples", "--dialect", "hal.v0", "--name", "dialects/hal.gal"]) == 0
+    out = capsys.readouterr().out
+
+    assert out.startswith("@gal netlist.v0\n@dialect hal.v0\n")
 
 
 def test_cli_examples_json_filters_named_example(capsys):
@@ -48,6 +72,13 @@ def test_cli_examples_reports_unknown_name(capsys):
     payload = json.loads(capsys.readouterr().err)
 
     assert payload == {"ok": False, "error": "unknown_example", "name": "missing.gal"}
+
+
+def test_cli_examples_reports_name_outside_dialect_filter(capsys):
+    assert main(["examples", "--dialect", "hal.v0", "--name", "minimal.mal.gal"]) == 1
+    payload = json.loads(capsys.readouterr().err)
+
+    assert payload == {"ok": False, "error": "unknown_example", "name": "minimal.mal.gal"}
 
 
 def test_cli_examples_writes_all_examples(tmp_path, capsys):
@@ -68,6 +99,17 @@ def test_cli_examples_writes_named_example_as_json(tmp_path, capsys):
     assert payload["examples"] == [{"name": "dialects/hal.gal", "dialect": "hal.v0"}]
     assert payload["written"] == [str(tmp_path / "dialects" / "hal.gal")]
     assert (tmp_path / "dialects" / "hal.gal").exists()
+
+
+def test_cli_examples_writes_filtered_examples(tmp_path, capsys):
+    assert main(["examples", "--dialect", "hal.v0", "--write-dir", str(tmp_path), "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    Draft202012Validator(get_schema("gal.examples.v0")).validate(payload)
+    assert payload["examples"] == [{"name": "dialects/hal.gal", "dialect": "hal.v0"}]
+    assert payload["written"] == [str(tmp_path / "dialects" / "hal.gal")]
+    assert (tmp_path / "dialects" / "hal.gal").exists()
+    assert not (tmp_path / "minimal.mal.gal").exists()
 
 
 def test_cli_examples_refuses_to_overwrite_without_force(tmp_path, capsys):
