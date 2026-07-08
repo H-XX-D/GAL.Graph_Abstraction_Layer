@@ -95,3 +95,10 @@ def test_ci_runs_release_version_check():
     workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
 
     assert "python scripts/release_check.py --version-only" in workflow
+
+
+def test_ci_checks_only_distribution_artifacts():
+    workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+
+    assert "python -m twine check dist/*.whl dist/*.tar.gz" in workflow
+    assert "python -m twine check dist/*\n" not in workflow
