@@ -50,6 +50,8 @@ gal convert starter.hal.gal --to dot
 
 - [GAL_NETLIST_SPEC.md](GAL_NETLIST_SPEC.md): draft GAL:netlist specification.
 - [CHANGELOG.md](CHANGELOG.md): notable project changes by working release.
+- [RELEASE.md](RELEASE.md): release gate, tagging, GitHub release, and optional
+  PyPI publishing runbook.
 - [docs/ROADMAP.md](docs/ROADMAP.md): implementation and refinement milestones.
 - [docs/GLOSSARY.md](docs/GLOSSARY.md): working terms and vocabulary.
 - [docs/dialects/](docs/dialects/): draft GAL dialect specifications.

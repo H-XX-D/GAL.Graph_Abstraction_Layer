@@ -116,8 +116,8 @@ checks:
   stability expectations.
 - Confirm that `GAL_NETLIST_SPEC.md`, `docs/dialects/*.md`, and bundled
   examples describe the same syntax and validation behavior.
-- Add release instructions for building, verifying, tagging, and publishing the
-  package.
+- Keep `RELEASE.md` current with the local release gate, tagging, GitHub
+  release, and optional PyPI publishing process.
 - Tag the release only after local tests, package build, installed-wheel smoke
   tests, CI, and Pages deployment are green for the exact commit.
 
