@@ -51,7 +51,8 @@ published package release.
 
 ### Validation
 
-- Test suite currently passes with 84 tests.
-- CI verifies package builds and smoke-tests the installed wheel outside the
-  checkout.
+- The release gate runs the test suite, package build, Twine artifact checks,
+  installed-wheel smoke tests, and CLI smoke tests.
+- CI verifies package builds, package metadata, bundled examples, and the
+  installed wheel outside the checkout.
 - GitHub Pages deployment is active for project docs and schema artifacts.

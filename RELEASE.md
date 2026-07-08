@@ -29,11 +29,13 @@ Run the local release gate:
 python3 scripts/release_check.py
 ```
 
-The release gate runs tests, builds the source distribution and wheel, checks
-the distribution artifacts with Twine, smoke-tests the wheel from a temporary
-virtual environment, smoke-tests checkout CLI commands, and prints the manual
-tag and publish commands. It does not tag, push a tag, create a GitHub release,
-or upload to PyPI.
+The release gate checks version consistency across `pyproject.toml`,
+`src/gal_netlist/_version.py`, `CHANGELOG.md`, and the requested tag. It then
+runs tests, builds the source distribution and wheel, checks the distribution
+artifacts with Twine, smoke-tests the wheel from a temporary virtual
+environment, smoke-tests checkout CLI commands, and prints the manual tag and
+publish commands. It does not tag, push a tag, create a GitHub release, or
+upload to PyPI.
 
 During release-gate development only, use:
 

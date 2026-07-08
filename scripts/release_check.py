@@ -5,10 +5,12 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import tomllib
 from pathlib import Path
 
 
@@ -24,6 +26,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if not args.allow_dirty:
         require_clean_worktree()
+
+    validate_release_version(args.tag)
 
     if not args.keep_build:
         remove_build_outputs()
@@ -77,6 +81,32 @@ def require_clean_worktree() -> None:
 def remove_build_outputs() -> None:
     shutil.rmtree(DIST, ignore_errors=True)
     shutil.rmtree(BUILD, ignore_errors=True)
+
+
+def validate_release_version(tag: str) -> None:
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    pyproject_version = pyproject["project"]["version"]
+    fallback_version = _regex_value(ROOT / "src" / "gal_netlist" / "_version.py", r'^FALLBACK_VERSION = "([^"]+)"$')
+    changelog_version = _regex_value(ROOT / "CHANGELOG.md", r"^## ([0-9]+\.[0-9]+\.[0-9]+) - \d{4}-\d{2}-\d{2}$")
+
+    expected = {
+        "release_check": VERSION,
+        "pyproject": pyproject_version,
+        "fallback_version": fallback_version,
+        "changelog": changelog_version,
+        "tag": tag.removeprefix("v"),
+    }
+    versions = set(expected.values())
+    if len(versions) != 1:
+        details = "\n".join(f"{name}: {version}" for name, version in expected.items())
+        raise SystemExit("release version mismatch\n\n" + details)
+
+
+def _regex_value(path: Path, pattern: str) -> str:
+    match = re.search(pattern, path.read_text(encoding="utf-8"), flags=re.MULTILINE)
+    if match is None:
+        raise SystemExit(f"could not find release version in {path}")
+    return match.group(1)
 
 
 def check_distribution_artifacts() -> None:

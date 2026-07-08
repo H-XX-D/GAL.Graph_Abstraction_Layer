@@ -1,3 +1,4 @@
+import importlib.util
 import subprocess
 import sys
 import tomllib
@@ -5,6 +6,16 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+RELEASE_CHECK = ROOT / "scripts" / "release_check.py"
+
+
+def load_release_check():
+    spec = importlib.util.spec_from_file_location("release_check", RELEASE_CHECK)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def test_release_check_help():
@@ -21,7 +32,7 @@ def test_release_check_help():
 
 
 def test_release_check_runs_twine_check_and_dev_extra_includes_twine():
-    script = (ROOT / "scripts" / "release_check.py").read_text(encoding="utf-8")
+    script = RELEASE_CHECK.read_text(encoding="utf-8")
     pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
 
     assert '"twine", "check"' in script
@@ -29,3 +40,21 @@ def test_release_check_runs_twine_check_and_dev_extra_includes_twine():
         dependency.startswith("twine>=")
         for dependency in pyproject["project"]["optional-dependencies"]["dev"]
     )
+
+
+def test_release_check_validates_version_consistency():
+    release_check = load_release_check()
+
+    release_check.validate_release_version("v0.1.0")
+
+
+def test_release_check_rejects_mismatched_tag():
+    release_check = load_release_check()
+
+    try:
+        release_check.validate_release_version("v9.9.9")
+    except SystemExit as exc:
+        assert "release version mismatch" in str(exc)
+        assert "tag: 9.9.9" in str(exc)
+    else:
+        raise AssertionError("expected mismatched tag to fail")
