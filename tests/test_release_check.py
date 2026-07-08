@@ -31,6 +31,7 @@ def test_release_check_help():
     assert "Run the GAL 0.1.0 local release gate" in result.stdout
     assert "--allow-dirty" in result.stdout
     assert "--version-only" in result.stdout
+    assert "--artifacts-only" in result.stdout
 
 
 def test_release_check_version_only_mode():
@@ -99,6 +100,28 @@ def test_release_check_writes_version_release_notes(tmp_path, monkeypatch):
 
     assert release_check.write_release_notes() == notes_path
     assert notes_path.read_text(encoding="utf-8").startswith("# GAL 0.1.0")
+
+
+def test_release_check_checks_built_release_artifacts(tmp_path, monkeypatch):
+    release_check = load_release_check()
+    dist = tmp_path / "dist"
+    dist.mkdir()
+    sdist = dist / "gal_netlist-0.1.0.tar.gz"
+    wheel = dist / "gal_netlist-0.1.0-py3-none-any.whl"
+    sdist.write_bytes(b"sdist")
+    wheel.write_bytes(b"wheel")
+    calls = []
+    monkeypatch.setattr(release_check, "DIST", dist)
+    monkeypatch.setattr(release_check, "CHECKSUMS", dist / "SHA256SUMS")
+    monkeypatch.setattr(release_check, "RELEASE_NOTES", dist / "release-notes-v0.1.0.md")
+    monkeypatch.setattr(release_check, "run", lambda command, **kwargs: calls.append(command))
+
+    release_check.check_built_release_artifacts()
+
+    assert calls == [[sys.executable, "-m", "twine", "check", str(wheel), str(sdist)]]
+    assert release_check.RELEASE_NOTES.is_file()
+    assert release_check.CHECKSUMS.is_file()
+    release_check.verify_checksum_manifest()
 
 
 def test_release_check_writes_checksum_manifest(tmp_path, monkeypatch):
@@ -170,8 +193,9 @@ def test_ci_runs_release_version_check():
     assert "python scripts/release_check.py --version-only" in workflow
 
 
-def test_ci_checks_only_distribution_artifacts():
+def test_ci_checks_release_artifacts_with_release_gate():
     workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
 
-    assert "python -m twine check dist/*.whl dist/*.tar.gz" in workflow
+    assert "python scripts/release_check.py --artifacts-only" in workflow
+    assert "python -m twine check" not in workflow
     assert "python -m twine check dist/*\n" not in workflow

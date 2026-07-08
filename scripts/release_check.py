@@ -39,6 +39,12 @@ def main(argv: list[str] | None = None) -> int:
         print(f"release version ok: {VERSION}")
         return 0
 
+    if args.artifacts_only:
+        validate_release_version(args.tag)
+        check_built_release_artifacts()
+        print(f"release artifacts ok: {VERSION}")
+        return 0
+
     if not args.allow_dirty:
         require_clean_worktree()
 
@@ -49,14 +55,18 @@ def main(argv: list[str] | None = None) -> int:
 
     run([sys.executable, "-m", "pytest", "-q"])
     run([sys.executable, "-m", "build"])
-    write_release_notes()
-    check_distribution_artifacts()
-    write_checksum_manifest()
-    verify_checksum_manifest()
+    check_built_release_artifacts()
     smoke_installed_wheel()
     smoke_checkout_cli()
     print_next_steps(args.tag)
     return 0
+
+
+def check_built_release_artifacts() -> None:
+    write_release_notes()
+    check_distribution_artifacts()
+    write_checksum_manifest()
+    verify_checksum_manifest()
 
 
 def parse_args(argv: list[str] | None) -> argparse.Namespace:
@@ -82,6 +92,11 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
         "--version-only",
         action="store_true",
         help="only check release version consistency, then exit",
+    )
+    parser.add_argument(
+        "--artifacts-only",
+        action="store_true",
+        help="check already-built dist/ artifacts and release sidecars, then exit",
     )
     return parser.parse_args(argv)
 

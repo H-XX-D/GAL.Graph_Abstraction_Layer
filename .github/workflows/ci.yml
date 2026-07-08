@@ -33,8 +33,8 @@ jobs:
       - name: Build package
         run: python -m build
 
-      - name: Check package metadata
-        run: python -m twine check dist/*.whl dist/*.tar.gz
+      - name: Check release artifacts
+        run: python scripts/release_check.py --artifacts-only
 
       - name: Smoke installed wheel
         run: |
