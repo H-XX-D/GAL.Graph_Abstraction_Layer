@@ -1,10 +1,12 @@
 from pathlib import Path
+import importlib.util
 import re
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_DIR = ROOT / ".claude" / "skills" / "fallacy-guard"
 COMMAND_PATH = ROOT / ".claude" / "commands" / "fallacy-guard.md"
+INSTALLER_PATH = ROOT / "scripts" / "install_claude_fallacy_guard.py"
 
 
 EXPECTED_FALLACIES = [
@@ -103,6 +105,47 @@ def test_fallacy_guard_legacy_command_wrapper_points_to_skill():
     assert ".claude/skills/fallacy-guard/math-guards.md" in text
 
 
+def test_fallacy_guard_installer_copies_personal_files(tmp_path, capsys):
+    installer = _load_installer()
+
+    assert installer.install(tmp_path) == 0
+
+    for source, destination in installer.FILES:
+        assert (tmp_path / destination).read_text(encoding="utf-8") == (ROOT / source).read_text(encoding="utf-8")
+    assert "fallacy guard installed" in capsys.readouterr().out
+
+
+def test_fallacy_guard_installer_check_detects_missing_files(tmp_path):
+    installer = _load_installer()
+
+    assert installer.install(tmp_path, check=True) == 1
+
+
+def test_fallacy_guard_installer_refuses_to_overwrite_different_file(tmp_path):
+    installer = _load_installer()
+    destination = tmp_path / "commands" / "fallacy-guard.md"
+    destination.parent.mkdir(parents=True)
+    destination.write_text("local custom command\n", encoding="utf-8")
+
+    try:
+        installer.install(tmp_path)
+    except installer.InstallError as error:
+        assert "--force" in str(error)
+        assert str(destination) in str(error)
+    else:
+        raise AssertionError("expected differing installed file to require --force")
+
+
+def test_fallacy_guard_installer_force_overwrites_different_file(tmp_path):
+    installer = _load_installer()
+    destination = tmp_path / "commands" / "fallacy-guard.md"
+    destination.parent.mkdir(parents=True)
+    destination.write_text("local custom command\n", encoding="utf-8")
+
+    assert installer.install(tmp_path, force=True) == 0
+    assert destination.read_text(encoding="utf-8") == COMMAND_PATH.read_text(encoding="utf-8")
+
+
 def test_fallacy_catalog_covers_requested_fallacies_in_order():
     text = (SKILL_DIR / "fallacy-catalog.md").read_text(encoding="utf-8")
     rows = re.findall(r"^\| (\d+) \| ([^|]+) \|", text, flags=re.MULTILINE)
@@ -161,7 +204,24 @@ def test_source_distribution_includes_project_skill_files():
 
     assert "recursive-include .claude/skills/fallacy-guard *.md" in text
     assert "recursive-include .claude/commands *.md" in text
+    assert "include scripts/install_claude_fallacy_guard.py" in text
+
+
+def test_readme_documents_fallacy_guard_installer():
+    text = (ROOT / "README.md").read_text(encoding="utf-8")
+
+    assert "scripts/install_claude_fallacy_guard.py" in text
+    assert "python3 scripts/install_claude_fallacy_guard.py --check" in text
 
 
 def _catalog_cells(line: str) -> list[str]:
     return line.strip().removeprefix("| ").removesuffix(" |").split(" | ")
+
+
+def _load_installer():
+    spec = importlib.util.spec_from_file_location("install_claude_fallacy_guard", INSTALLER_PATH)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module

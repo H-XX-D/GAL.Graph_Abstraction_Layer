@@ -67,6 +67,9 @@ gal convert starter.hal.gal --to dot
 - [scripts/release_check.py](scripts/release_check.py): local release gate that
   verifies tests, package build, distribution metadata, installed-wheel smoke
   tests, and CLI smokes.
+- [scripts/install_claude_fallacy_guard.py](scripts/install_claude_fallacy_guard.py):
+  installs or checks the Fallacy Guard Claude skill and compatibility slash
+  command under `~/.claude`.
 - [docs/index.html](docs/index.html): static project page deployed with GitHub
   Pages.
 
@@ -147,6 +150,7 @@ Run the current checks:
 python3 -m pytest -q
 python3 -m build
 python3 scripts/release_check.py --allow-dirty
+python3 scripts/install_claude_fallacy_guard.py --check
 gal --version
 gal doctor --json
 gal examples

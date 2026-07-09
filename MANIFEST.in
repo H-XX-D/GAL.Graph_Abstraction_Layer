@@ -1,2 +1,3 @@
 recursive-include .claude/skills/fallacy-guard *.md
 recursive-include .claude/commands *.md
+include scripts/install_claude_fallacy_guard.py
